@@ -12,8 +12,17 @@ export async function PUT(
 
     // Önce mevcut talebi al
     const mevcutTalep = await sql`
-      SELECT talep_durumu FROM talepler WHERE id = ${id}
+      SELECT * FROM talepler WHERE id = ${id}
     `;
+
+    if (mevcutTalep.length === 0) {
+      return NextResponse.json(
+        { error: 'Talep bulunamadı' },
+        { status: 404 }
+      );
+    }
+
+    const eskiTalep = mevcutTalep[0];
 
     const guncelTalep = await sql`
       UPDATE talepler 
@@ -51,19 +60,55 @@ export async function PUT(
         guncelleme_tarihi as "guncellemeTarihi"
     `;
 
-    // Eğer durum değiştiyse geçmişe kaydet
-    if (mevcutTalep.length > 0 && mevcutTalep[0].talep_durumu !== body.talepDurumu) {
-      await sql`
-        INSERT INTO talep_durum_gecmisi (talep_id, eski_durum, yeni_durum)
-        VALUES (${id}, ${mevcutTalep[0].talep_durumu}, ${body.talepDurumu})
-      `;
+    // Değişiklikleri logla
+    const alanlar = [
+      { db: 'talep_sahibi', frontend: 'talepSahibi', label: 'Talep Sahibi' },
+      { db: 'talep_sahibi_aciklamasi', frontend: 'talepSahibiAciklamasi', label: 'Talep Sahibi Açıklaması' },
+      { db: 'talep_sahibi_diger_aciklama', frontend: 'talepSahibiDigerAciklama', label: 'Diğer Açıklama' },
+      { db: 'talep_ilcesi', frontend: 'talepIlcesi', label: 'Talep İlçesi' },
+      { db: 'bolge', frontend: 'bolge', label: 'Bölge' },
+      { db: 'hat_no', frontend: 'hatNo', label: 'Hat No' },
+      { db: 'isletici', frontend: 'isletici', label: 'İşletici' },
+      { db: 'talep_ozeti', frontend: 'talepOzeti', label: 'Talep Özeti' },
+      { db: 'talep_iletim_sekli', frontend: 'talepIletimSekli', label: 'Talep İletim Şekli' },
+      { db: 'evrak_tarihi', frontend: 'evrakTarihi', label: 'Evrak Tarihi' },
+      { db: 'evrak_sayisi', frontend: 'evrakSayisi', label: 'Evrak Sayısı' },
+      { db: 'yapilan_is', frontend: 'yapılanIs', label: 'Yapılan İş' },
+      { db: 'talep_durumu', frontend: 'talepDurumu', label: 'Talep Durumu' }
+    ];
+
+    for (const alan of alanlar) {
+      const eskiDeger = eskiTalep[alan.db];
+      const yeniDeger = body[alan.frontend];
+      
+      if (eskiDeger !== yeniDeger) {
+        await sql`
+          INSERT INTO talep_loglari (
+            talep_id, 
+            islem_tipi, 
+            alan_adi, 
+            eski_deger, 
+            yeni_deger, 
+            aciklama
+          )
+          VALUES (
+            ${id}, 
+            'guncelleme', 
+            ${alan.label}, 
+            ${eskiDeger || ''}, 
+            ${yeniDeger || ''}, 
+            ${`${alan.label} alanı güncellendi`}
+          )
+        `;
+      }
     }
 
-    if (guncelTalep.length === 0) {
-      return NextResponse.json(
-        { error: 'Talep bulunamadı' },
-        { status: 404 }
-      );
+    // Eğer durum değiştiyse eski geçmiş tablosuna da kaydet (geriye uyumluluk)
+    if (eskiTalep.talep_durumu !== body.talepDurumu) {
+      await sql`
+        INSERT INTO talep_durum_gecmisi (talep_id, eski_durum, yeni_durum)
+        VALUES (${id}, ${eskiTalep.talep_durumu}, ${body.talepDurumu})
+      `;
     }
 
     return NextResponse.json(guncelTalep[0]);
@@ -84,18 +129,43 @@ export async function DELETE(
   try {
     const { id } = params;
 
+    // Önce mevcut talebi al
+    const mevcutTalep = await sql`
+      SELECT * FROM talepler WHERE id = ${id}
+    `;
+
+    if (mevcutTalep.length === 0) {
+      return NextResponse.json(
+        { error: 'Talep bulunamadı' },
+        { status: 404 }
+      );
+    }
+
     const silinenTalep = await sql`
       DELETE FROM talepler 
       WHERE id = ${id}
       RETURNING *
     `;
 
-    if (silinenTalep.length === 0) {
-      return NextResponse.json(
-        { error: 'Talep bulunamadı' },
-        { status: 404 }
-      );
-    }
+    // Silme işlemini logla
+    await sql`
+      INSERT INTO talep_loglari (
+        talep_id, 
+        islem_tipi, 
+        alan_adi, 
+        eski_deger, 
+        yeni_deger, 
+        aciklama
+      )
+      VALUES (
+        ${id}, 
+        'silme', 
+        'Talep', 
+        ${JSON.stringify(mevcutTalep[0])}, 
+        '', 
+        'Talep tamamen silindi'
+      )
+    `;
 
     return NextResponse.json({ message: 'Talep başarıyla silindi' });
   } catch (error) {

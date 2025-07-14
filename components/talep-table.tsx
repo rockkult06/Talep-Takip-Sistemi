@@ -10,10 +10,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { ArrowUpDown, Download, Upload, Trash2, Edit } from "lucide-react"
+import { ArrowUpDown, Download, Upload, Trash2, Edit, Eye } from "lucide-react"
 import type { Talep } from "@/types/talep"
 import * as XLSX from "xlsx"
 import RaporDialog from "./rapor-dialog"
+import TalepEditDialog from "./talep-edit-dialog"
+import TalepViewDialog from "./talep-view-dialog"
 
 interface TalepTableProps {
   talepler: Talep[]
@@ -34,6 +36,9 @@ export default function TalepTable({ talepler, onTalepGuncelle, onTalepSil }: Ta
     isletici: "",
     search: "",
   })
+  const [editDialogOpen, setEditDialogOpen] = useState(false)
+  const [viewDialogOpen, setViewDialogOpen] = useState(false)
+  const [selectedTalep, setSelectedTalep] = useState<Talep | null>(null)
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
@@ -134,6 +139,16 @@ export default function TalepTable({ talepler, onTalepGuncelle, onTalepSil }: Ta
       }
     }
     reader.readAsArrayBuffer(file)
+  }
+
+  const handleEditTalep = (talep: Talep) => {
+    setSelectedTalep(talep)
+    setEditDialogOpen(true)
+  }
+
+  const handleViewTalep = (talep: Talep) => {
+    setSelectedTalep(talep)
+    setViewDialogOpen(true)
   }
 
   const getDurumBadgeVariant = (durum: string) => {
@@ -400,13 +415,16 @@ export default function TalepTable({ talepler, onTalepGuncelle, onTalepSil }: Ta
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => {
-                            // Basit bir düzenleme örneği - gerçek uygulamada modal açılabilir
-                            const yeniDurum = prompt("Yeni durum:", talep.talepDurumu)
-                            if (yeniDurum && yeniDurum !== talep.talepDurumu) {
-                              onTalepGuncelle(talep.id, { talepDurumu: yeniDurum })
-                            }
-                          }}
+                          onClick={() => handleViewTalep(talep)}
+                          title="Görüntüle"
+                        >
+                          <Eye className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleEditTalep(talep)}
+                          title="Düzenle"
                         >
                           <Edit className="w-4 h-4" />
                         </Button>
@@ -418,6 +436,7 @@ export default function TalepTable({ talepler, onTalepGuncelle, onTalepSil }: Ta
                               onTalepSil(talep.id)
                             }
                           }}
+                          title="Sil"
                         >
                           <Trash2 className="w-4 h-4" />
                         </Button>
@@ -435,6 +454,20 @@ export default function TalepTable({ talepler, onTalepGuncelle, onTalepSil }: Ta
           </div>
         </CardContent>
       </Card>
+
+      {/* Modaller */}
+      <TalepEditDialog
+        talep={selectedTalep}
+        open={editDialogOpen}
+        onOpenChange={setEditDialogOpen}
+        onSave={onTalepGuncelle}
+      />
+      
+      <TalepViewDialog
+        talep={selectedTalep}
+        open={viewDialogOpen}
+        onOpenChange={setViewDialogOpen}
+      />
     </div>
   )
 }
