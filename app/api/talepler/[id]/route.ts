@@ -10,6 +10,11 @@ export async function PUT(
     const body = await request.json();
     const { id } = params;
 
+    // Önce mevcut talebi al
+    const mevcutTalep = await sql`
+      SELECT talep_durumu FROM talepler WHERE id = ${id}
+    `;
+
     const guncelTalep = await sql`
       UPDATE talepler 
       SET 
@@ -45,6 +50,14 @@ export async function PUT(
         talep_durumu as "talepDurumu",
         guncelleme_tarihi as "guncellemeTarihi"
     `;
+
+    // Eğer durum değiştiyse geçmişe kaydet
+    if (mevcutTalep.length > 0 && mevcutTalep[0].talep_durumu !== body.talepDurumu) {
+      await sql`
+        INSERT INTO talep_durum_gecmisi (talep_id, eski_durum, yeni_durum)
+        VALUES (${id}, ${mevcutTalep[0].talep_durumu}, ${body.talepDurumu})
+      `;
+    }
 
     if (guncelTalep.length === 0) {
       return NextResponse.json(

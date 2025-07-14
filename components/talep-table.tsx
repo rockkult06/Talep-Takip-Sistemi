@@ -13,6 +13,7 @@ import { Badge } from "@/components/ui/badge"
 import { ArrowUpDown, Download, Upload, Trash2, Edit } from "lucide-react"
 import type { Talep } from "@/types/talep"
 import * as XLSX from "xlsx"
+import RaporDialog from "./rapor-dialog"
 
 interface TalepTableProps {
   talepler: Talep[]
@@ -159,10 +160,10 @@ export default function TalepTable({ talepler, onTalepGuncelle, onTalepSil }: Ta
 
   return (
     <div className="space-y-6">
-      {/* Excel İşlemleri */}
+      {/* Excel İşlemleri ve Rapor */}
       <Card>
         <CardHeader>
-          <CardTitle>Excel İşlemleri</CardTitle>
+          <CardTitle>Dışa Aktarma ve Raporlar</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex flex-col sm:flex-row gap-4">
@@ -185,6 +186,7 @@ export default function TalepTable({ talepler, onTalepGuncelle, onTalepSil }: Ta
                 className="hidden"
               />
             </div>
+            <RaporDialog talepler={talepler} />
           </div>
         </CardContent>
       </Card>

@@ -1,0 +1,276 @@
+"use client"
+
+import { useState } from "react"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Checkbox } from "@/components/ui/checkbox"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import { FileText, Download } from "lucide-react"
+import type { Talep } from "@/types/talep"
+import * as XLSX from "xlsx"
+
+interface RaporDialogProps {
+  talepler: Talep[]
+}
+
+export default function RaporDialog({ talepler }: RaporDialogProps) {
+  const [open, setOpen] = useState(false)
+  const [baslangicTarihi, setBaslangicTarihi] = useState("")
+  const [bitisTarihi, setBitisTarihi] = useState("")
+  const [yeniGelenRaporlar, setYeniGelenRaporlar] = useState(false)
+  const [durumuDegisenTalepler, setDurumuDegisenTalepler] = useState(false)
+  const [raporVerileri, setRaporVerileri] = useState<Talep[]>([])
+
+  const raporOlustur = () => {
+    if (!baslangicTarihi || !bitisTarihi) {
+      alert("Lütfen tarih aralığını seçin")
+      return
+    }
+
+    if (!yeniGelenRaporlar && !durumuDegisenTalepler) {
+      alert("Lütfen en az bir rapor türü seçin")
+      return
+    }
+
+    const baslangic = new Date(baslangicTarihi)
+    const bitis = new Date(bitisTarihi)
+
+    let filtrelenmisTalepler: Talep[] = []
+
+    // Tarih aralığına göre filtrele
+    const tarihAraligindakiTalepler = talepler.filter((talep) => {
+      const talepTarihi = new Date(talep.guncellemeTarihi)
+      return talepTarihi >= baslangic && talepTarihi <= bitis
+    })
+
+    if (yeniGelenRaporlar) {
+      // Yeni gelen raporlar (belirtilen tarih aralığında oluşturulan talepler)
+      const yeniTalepler = tarihAraligindakiTalepler.filter((talep) => {
+        const olusturmaTarihi = new Date(talep.guncellemeTarihi)
+        // İlk kez oluşturulan talepler (güncelleme tarihi ile oluşturma tarihi aynı)
+        return olusturmaTarihi >= baslangic && olusturmaTarihi <= bitis
+      })
+      filtrelenmisTalepler.push(...yeniTalepler)
+    }
+
+    if (durumuDegisenTalepler) {
+      // Durumu değişen talepler (durum değişikliği olan talepler)
+      const durumuDegisenTaleplerListesi = tarihAraligindakiTalepler.filter((talep) => {
+        // Durum değişikliği olan talepler (İletildi dışındaki durumlar)
+        return talep.talepDurumu !== "İletildi" && 
+               (talep.talepDurumu === "Değerlendirilecek" || 
+                talep.talepDurumu === "Olumlu" || 
+                talep.talepDurumu === "Olumsuz")
+      })
+      filtrelenmisTalepler.push(...durumuDegisenTaleplerListesi)
+    }
+
+    // Tekrarlanan talepleri kaldır
+    const benzersizTalepler = filtrelenmisTalepler.filter((talep, index, self) => 
+      index === self.findIndex(t => t.id === talep.id)
+    )
+
+    setRaporVerileri(benzersizTalepler)
+  }
+
+  const raporuIndir = () => {
+    if (raporVerileri.length === 0) {
+      alert("İndirilecek rapor bulunamadı")
+      return
+    }
+
+    const exportData = raporVerileri.map((talep) => ({
+      "Talep ID": talep.id,
+      "Talep Sahibi": talep.talepSahibi,
+      "Talep Sahibi Açıklaması": talep.talepSahibiAciklamasi,
+      "Diğer Açıklama": talep.talepSahibiDigerAciklama || "",
+      "Talep İlçesi": talep.talepIlcesi,
+      "Bölge": talep.bolge,
+      "Hat No": talep.hatNo,
+      "İşletici": talep.isletici,
+      "Talep Özeti": talep.talepOzeti,
+      "Talep İletim Şekli": talep.talepIletimSekli,
+      "Evrak Tarihi": talep.evrakTarihi || "",
+      "Evrak Sayısı": talep.evrakSayisi || "",
+      "Yapılan İş": talep.yapılanIs,
+      "Talep Durumu": talep.talepDurumu,
+      "Güncelleme Tarihi": talep.guncellemeTarihi,
+    }))
+
+    const ws = XLSX.utils.json_to_sheet(exportData)
+    const wb = XLSX.utils.book_new()
+    XLSX.utils.book_append_sheet(wb, ws, "Rapor")
+    
+    const tarihAraligi = `${baslangicTarihi}_${bitisTarihi}`
+    const raporTuru = []
+    if (yeniGelenRaporlar) raporTuru.push("YeniGelen")
+    if (durumuDegisenTalepler) raporTuru.push("DurumuDegisen")
+    
+    XLSX.writeFile(wb, `talep_raporu_${tarihAraligi}_${raporTuru.join("_")}.xlsx`)
+  }
+
+  const getDurumBadgeVariant = (durum: string) => {
+    switch (durum) {
+      case "Olumlu":
+        return "default"
+      case "Olumsuz":
+        return "destructive"
+      case "İletildi":
+        return "secondary"
+      case "Değerlendirilecek":
+        return "outline"
+      default:
+        return "secondary"
+    }
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button className="flex items-center gap-2">
+          <FileText className="w-4 h-4" />
+          Rapor Al
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Talep Raporu Oluştur</DialogTitle>
+          <DialogDescription>
+            Tarih aralığı ve rapor türü seçerek özel rapor oluşturun
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-6">
+          {/* Tarih Aralığı */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Tarih Aralığı</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="baslangic-tarihi">Başlangıç Tarihi</Label>
+                  <Input
+                    id="baslangic-tarihi"
+                    type="date"
+                    value={baslangicTarihi}
+                    onChange={(e) => setBaslangicTarihi(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="bitis-tarihi">Bitiş Tarihi</Label>
+                  <Input
+                    id="bitis-tarihi"
+                    type="date"
+                    value={bitisTarihi}
+                    onChange={(e) => setBitisTarihi(e.target.value)}
+                  />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Rapor Türleri */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Rapor Türleri</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                                 <div className="flex items-center space-x-2">
+                   <Checkbox
+                     id="yeni-gelen"
+                     checked={yeniGelenRaporlar}
+                     onCheckedChange={(checked) => setYeniGelenRaporlar(checked as boolean)}
+                   />
+                   <Label htmlFor="yeni-gelen" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                     Yeni Gelen Raporlar
+                   </Label>
+                   <span className="text-xs text-muted-foreground ml-2">
+                     (Belirtilen tarih aralığında oluşturulan talepler)
+                   </span>
+                 </div>
+                 <div className="flex items-center space-x-2">
+                   <Checkbox
+                     id="durumu-degisen"
+                     checked={durumuDegisenTalepler}
+                     onCheckedChange={(checked) => setDurumuDegisenTalepler(checked as boolean)}
+                   />
+                   <Label htmlFor="durumu-degisen" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                     Durumu Değişen Talepler
+                   </Label>
+                   <span className="text-xs text-muted-foreground ml-2">
+                     (Değerlendirilecek, Olumlu, Olumsuz durumundaki talepler)
+                   </span>
+                 </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Rapor Oluştur Butonu */}
+          <div className="flex justify-center">
+            <Button onClick={raporOlustur} className="flex items-center gap-2">
+              <FileText className="w-4 h-4" />
+              Rapor Oluştur
+            </Button>
+          </div>
+
+          {/* Rapor Sonuçları */}
+          {raporVerileri.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center justify-between">
+                  Rapor Sonuçları ({raporVerileri.length} talep)
+                  <Button onClick={raporuIndir} className="flex items-center gap-2">
+                    <Download className="w-4 h-4" />
+                    Excel'e İndir
+                  </Button>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4 max-h-96 overflow-y-auto">
+                  {raporVerileri.map((talep) => (
+                    <div key={talep.id} className="border rounded-lg p-4 space-y-2">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium">#{talep.id}</span>
+                          <Badge variant={getDurumBadgeVariant(talep.talepDurumu)}>
+                            {talep.talepDurumu}
+                          </Badge>
+                        </div>
+                        <span className="text-sm text-muted-foreground">
+                          {talep.guncellemeTarihi}
+                        </span>
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
+                        <div>
+                          <span className="font-medium">Talep Sahibi:</span> {talep.talepSahibi}
+                        </div>
+                        <div>
+                          <span className="font-medium">İlçe:</span> {talep.talepIlcesi}
+                        </div>
+                        <div>
+                          <span className="font-medium">Hat No:</span> {talep.hatNo}
+                        </div>
+                        <div>
+                          <span className="font-medium">İşletici:</span> {talep.isletici}
+                        </div>
+                      </div>
+                      <div>
+                        <span className="font-medium">Özet:</span>
+                        <p className="text-sm text-muted-foreground mt-1">{talep.talepOzeti}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+      </DialogContent>
+    </Dialog>
+  )
+} 

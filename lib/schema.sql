@@ -17,7 +17,19 @@ CREATE TABLE IF NOT EXISTS talepler (
   guncelleme_tarihi TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Durum değişikliklerini takip etmek için tablo
+CREATE TABLE IF NOT EXISTS talep_durum_gecmisi (
+  id SERIAL PRIMARY KEY,
+  talep_id INTEGER REFERENCES talepler(id) ON DELETE CASCADE,
+  eski_durum VARCHAR(100),
+  yeni_durum VARCHAR(100) NOT NULL,
+  degisiklik_tarihi TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  degistiren_kullanici VARCHAR(100) DEFAULT 'Sistem'
+);
+
 -- İndeksler ekleme (performans için)
 CREATE INDEX IF NOT EXISTS idx_talepler_guncelleme_tarihi ON talepler(guncelleme_tarihi DESC);
 CREATE INDEX IF NOT EXISTS idx_talepler_talep_durumu ON talepler(talep_durumu);
-CREATE INDEX IF NOT EXISTS idx_talepler_talep_ilcesi ON talepler(talep_ilcesi); 
+CREATE INDEX IF NOT EXISTS idx_talepler_talep_ilcesi ON talepler(talep_ilcesi);
+CREATE INDEX IF NOT EXISTS idx_talep_durum_gecmisi_talep_id ON talep_durum_gecmisi(talep_id);
+CREATE INDEX IF NOT EXISTS idx_talep_durum_gecmisi_degisiklik_tarihi ON talep_durum_gecmisi(degisiklik_tarihi DESC); 
