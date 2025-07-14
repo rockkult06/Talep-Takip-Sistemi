@@ -35,43 +35,70 @@ export default function RaporDialog({ talepler }: RaporDialogProps) {
       return
     }
 
-    const baslangic = new Date(baslangicTarihi)
-    const bitis = new Date(bitisTarihi)
+    // Tarih formatını düzelt - saat bilgisini ekle
+    const baslangic = new Date(baslangicTarihi + 'T00:00:00')
+    const bitis = new Date(bitisTarihi + 'T23:59:59')
+
+    console.log('Filtreleme başlangıç:', baslangic)
+    console.log('Filtreleme bitiş:', bitis)
+    console.log('Toplam talep sayısı:', talepler.length)
 
     let filtrelenmisTalepler: Talep[] = []
 
     // Tarih aralığına göre filtrele
     const tarihAraligindakiTalepler = talepler.filter((talep) => {
-      const talepTarihi = new Date(talep.guncellemeTarihi)
-      return talepTarihi >= baslangic && talepTarihi <= bitis
+      // Tarih formatını düzelt
+      let talepTarihi: Date
+      try {
+        // Eğer tarih string formatındaysa parse et
+        if (typeof talep.guncellemeTarihi === 'string') {
+          // Türkçe tarih formatını parse et (örn: "15.12.2023")
+          const tarihParcalari = talep.guncellemeTarihi.split('.')
+          if (tarihParcalari.length === 3) {
+            talepTarihi = new Date(parseInt(tarihParcalari[2]), parseInt(tarihParcalari[1]) - 1, parseInt(tarihParcalari[0]))
+          } else {
+            talepTarihi = new Date(talep.guncellemeTarihi)
+          }
+        } else {
+          talepTarihi = new Date(talep.guncellemeTarihi)
+        }
+      } catch (error) {
+        console.error('Tarih parse hatası:', talep.guncellemeTarihi, error)
+        return false
+      }
+
+      const tarihUygun = talepTarihi >= baslangic && talepTarihi <= bitis
+      console.log(`Talep ${talep.id}: ${talep.guncellemeTarihi} -> ${talepTarihi}, uygun: ${tarihUygun}`)
+      
+      return tarihUygun
     })
 
+    console.log('Tarih aralığındaki talep sayısı:', tarihAraligindakiTalepler.length)
+
     if (yeniGelenRaporlar) {
-      // Yeni gelen raporlar (belirtilen tarih aralığında oluşturulan talepler)
-      const yeniTalepler = tarihAraligindakiTalepler.filter((talep) => {
-        const olusturmaTarihi = new Date(talep.guncellemeTarihi)
-        // İlk kez oluşturulan talepler (güncelleme tarihi ile oluşturma tarihi aynı)
-        return olusturmaTarihi >= baslangic && olusturmaTarihi <= bitis
-      })
-      filtrelenmisTalepler.push(...yeniTalepler)
+      // Yeni gelen raporlar - tarih aralığındaki tüm talepler
+      filtrelenmisTalepler.push(...tarihAraligindakiTalepler)
+      console.log('Yeni gelen raporlar eklendi:', tarihAraligindakiTalepler.length)
     }
 
     if (durumuDegisenTalepler) {
-      // Durumu değişen talepler (durum değişikliği olan talepler)
+      // Durumu değişen talepler (İletildi dışındaki durumlar)
       const durumuDegisenTaleplerListesi = tarihAraligindakiTalepler.filter((talep) => {
-        // Durum değişikliği olan talepler (İletildi dışındaki durumlar)
         return talep.talepDurumu !== "İletildi" && 
                (talep.talepDurumu === "Değerlendirilecek" || 
                 talep.talepDurumu === "Olumlu" || 
                 talep.talepDurumu === "Olumsuz")
       })
       filtrelenmisTalepler.push(...durumuDegisenTaleplerListesi)
+      console.log('Durumu değişen talepler eklendi:', durumuDegisenTaleplerListesi.length)
     }
 
     // Tekrarlanan talepleri kaldır
     const benzersizTalepler = filtrelenmisTalepler.filter((talep, index, self) => 
       index === self.findIndex(t => t.id === talep.id)
     )
+
+    console.log('Benzersiz talep sayısı:', benzersizTalepler.length)
 
     setRaporVerileri(benzersizTalepler)
 
