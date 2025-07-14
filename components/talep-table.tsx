@@ -21,12 +21,13 @@ interface TalepTableProps {
   talepler: Talep[]
   onTalepGuncelle: (id: string, guncelTalep: Partial<Talep>) => void
   onTalepSil: (id: string) => void
+  onTalepEkle?: (yeniTalep: Omit<Talep, "id" | "guncellemeTarihi">) => void
 }
 
 type SortField = keyof Talep
 type SortDirection = "asc" | "desc"
 
-export default function TalepTable({ talepler, onTalepGuncelle, onTalepSil }: TalepTableProps) {
+export default function TalepTable({ talepler, onTalepGuncelle, onTalepSil, onTalepEkle }: TalepTableProps) {
   const [sortField, setSortField] = useState<SortField>("guncellemeTarihi")
   const [sortDirection, setSortDirection] = useState<SortDirection>("desc")
   const [filters, setFilters] = useState({
@@ -101,20 +102,25 @@ export default function TalepTable({ talepler, onTalepGuncelle, onTalepSil }: Ta
     XLSX.writeFile(wb, `talepler_${new Date().toISOString().split("T")[0]}.xlsx`)
   }
 
-  const handleExcelImport = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleExcelImport = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
     if (!file) return
 
     const reader = new FileReader()
-    reader.onload = (e) => {
+    reader.onload = async (e) => {
       try {
         const data = new Uint8Array(e.target?.result as ArrayBuffer)
         const workbook = XLSX.read(data, { type: "array" })
         const worksheet = workbook.Sheets[workbook.SheetNames[0]]
         const jsonData = XLSX.utils.sheet_to_json(worksheet)
 
-        const importedTalepler: Talep[] = jsonData.map((row: any, index) => ({
-          id: `imported_${Date.now()}_${index}`,
+        if (jsonData.length === 0) {
+          alert("Excel dosyasında veri bulunamadı")
+          event.target.value = ""
+          return
+        }
+
+        const importedTalepler = jsonData.map((row: any) => ({
           talepSahibi: row["Talep Sahibi"] || "",
           talepSahibiAciklamasi: row["Talep Sahibi Açıklaması"] || "",
           talepSahibiDigerAciklama: row["Diğer Açıklama"] || "",
@@ -127,15 +133,34 @@ export default function TalepTable({ talepler, onTalepGuncelle, onTalepSil }: Ta
           evrakTarihi: row["Evrak Tarihi"] || "",
           evrakSayisi: row["Evrak Sayısı"] || "",
           yapılanIs: row["Yapılan İş"] || "",
-          talepDurumu: row["Talep Durumu"] || "",
-          guncellemeTarihi: row["Güncelleme Tarihi"] || new Date().toLocaleDateString("tr-TR"),
+          talepDurumu: row["Talep Durumu"] || "Değerlendirilecek",
         }))
 
-        // Excel import özelliği veritabanı entegrasyonu için kaldırıldı
-        alert("Excel import özelliği şu anda kullanılamıyor. Lütfen talepleri manuel olarak ekleyin.")
+        // API'ye gönder
+        const response = await fetch('/api/talepler/import', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ talepler: importedTalepler }),
+        })
+
+        if (response.ok) {
+          const result = await response.json()
+          alert(`Başarılı! ${result.message}`)
+          
+          // Sayfayı yenile
+          window.location.reload()
+        } else {
+          const error = await response.json()
+          alert(`Hata: ${error.error}`)
+        }
+
         event.target.value = "" // Input'u temizle
       } catch (error) {
+        console.error('Excel import hatası:', error)
         alert("Excel dosyası okunurken hata oluştu. Lütfen dosya formatını kontrol edin.")
+        event.target.value = ""
       }
     }
     reader.readAsArrayBuffer(file)
