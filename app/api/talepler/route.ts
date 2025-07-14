@@ -6,7 +6,23 @@ import type { Talep } from '@/types/talep';
 export async function GET() {
   try {
     const talepler = await sql`
-      SELECT * FROM talepler 
+      SELECT 
+        id,
+        talep_sahibi as "talepSahibi",
+        talep_sahibi_aciklamasi as "talepSahibiAciklamasi",
+        talep_sahibi_diger_aciklama as "talepSahibiDigerAciklama",
+        talep_ilcesi as "talepIlcesi",
+        bolge,
+        hat_no as "hatNo",
+        isletici,
+        talep_ozeti as "talepOzeti",
+        talep_iletim_sekli as "talepIletimSekli",
+        evrak_tarihi as "evrakTarihi",
+        evrak_sayisi as "evrakSayisi",
+        yapilan_is as "yapılanIs",
+        talep_durumu as "talepDurumu",
+        guncelleme_tarihi as "guncellemeTarihi"
+      FROM talepler 
       ORDER BY guncelleme_tarihi DESC
     `;
     
@@ -72,7 +88,22 @@ export async function POST(request: NextRequest) {
         ${talepDurumu},
         NOW()
       )
-      RETURNING *
+      RETURNING 
+        id,
+        talep_sahibi as "talepSahibi",
+        talep_sahibi_aciklamasi as "talepSahibiAciklamasi",
+        talep_sahibi_diger_aciklama as "talepSahibiDigerAciklama",
+        talep_ilcesi as "talepIlcesi",
+        bolge,
+        hat_no as "hatNo",
+        isletici,
+        talep_ozeti as "talepOzeti",
+        talep_iletim_sekli as "talepIletimSekli",
+        evrak_tarihi as "evrakTarihi",
+        evrak_sayisi as "evrakSayisi",
+        yapilan_is as "yapılanIs",
+        talep_durumu as "talepDurumu",
+        guncelleme_tarihi as "guncellemeTarihi"
     `;
 
     return NextResponse.json(yeniTalep[0]);

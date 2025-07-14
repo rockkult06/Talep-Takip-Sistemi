@@ -46,10 +46,10 @@ export default function TalepTable({ talepler, onTalepGuncelle, onTalepSil }: Ta
   const filteredAndSortedTalepler = useMemo(() => {
     const filtered = talepler.filter((talep) => {
       return (
-        (!filters.talepSahibi || talep.talepSahibi === filters.talepSahibi) &&
-        (!filters.talepIlcesi || talep.talepIlcesi === filters.talepIlcesi) &&
-        (!filters.talepDurumu || talep.talepDurumu === filters.talepDurumu) &&
-        (!filters.isletici || talep.isletici === filters.isletici) &&
+        (!filters.talepSahibi || filters.talepSahibi === "all" || talep.talepSahibi === filters.talepSahibi) &&
+        (!filters.talepIlcesi || filters.talepIlcesi === "all" || talep.talepIlcesi === filters.talepIlcesi) &&
+        (!filters.talepDurumu || filters.talepDurumu === "all" || talep.talepDurumu === filters.talepDurumu) &&
+        (!filters.isletici || filters.isletici === "all" || talep.isletici === filters.isletici) &&
         (!filters.search ||
           talep.talepOzeti.toLowerCase().includes(filters.search.toLowerCase()) ||
           talep.hatNo.toLowerCase().includes(filters.search.toLowerCase()) ||
@@ -60,6 +60,10 @@ export default function TalepTable({ talepler, onTalepGuncelle, onTalepSil }: Ta
     return filtered.sort((a, b) => {
       const aValue = a[sortField]
       const bValue = b[sortField]
+
+      if (!aValue && !bValue) return 0
+      if (!aValue) return sortDirection === "asc" ? -1 : 1
+      if (!bValue) return sortDirection === "asc" ? 1 : -1
 
       if (aValue < bValue) return sortDirection === "asc" ? -1 : 1
       if (aValue > bValue) return sortDirection === "asc" ? 1 : -1
