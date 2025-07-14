@@ -3,50 +3,133 @@
 import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Button } from "@/components/ui/button"
+import { useToast } from "@/hooks/use-toast"
 import TalepForm from "@/components/talep-form"
 import TalepTable from "@/components/talep-table"
 import type { Talep } from "@/types/talep"
 
 export default function TalepTakipSistemi() {
   const [talepler, setTalepler] = useState<Talep[]>([])
+  const [loading, setLoading] = useState(true)
+  const { toast } = useToast()
+
+  // Talepleri veritabanından yükle
+  const talepleriYukle = async () => {
+    try {
+      setLoading(true)
+      const response = await fetch('/api/talepler')
+      if (!response.ok) {
+        throw new Error('Talepler yüklenemedi')
+      }
+      const data = await response.json()
+      setTalepler(data)
+    } catch (error) {
+      console.error('Talepler yüklenirken hata:', error)
+      toast({
+        title: "Hata",
+        description: "Talepler yüklenirken bir hata oluştu.",
+        variant: "destructive",
+      })
+    } finally {
+      setLoading(false)
+    }
+  }
 
   useEffect(() => {
-    // Local Storage'dan verileri yükle
-    const savedTalepler = localStorage.getItem("talepler")
-    if (savedTalepler) {
-      setTalepler(JSON.parse(savedTalepler))
-    }
+    talepleriYukle()
   }, [])
 
-  const handleTalepEkle = (yeniTalep: Omit<Talep, "id" | "guncellemeTarihi">) => {
-    const talep: Talep = {
-      ...yeniTalep,
-      id: Date.now().toString(),
-      guncellemeTarihi: new Date().toLocaleDateString("tr-TR"),
+  const handleTalepEkle = async (yeniTalep: Omit<Talep, "id" | "guncellemeTarihi">) => {
+    try {
+      const response = await fetch('/api/talepler', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(yeniTalep),
+      })
+
+      if (!response.ok) {
+        throw new Error('Talep eklenemedi')
+      }
+
+      const eklenenTalep = await response.json()
+      setTalepler(prev => [eklenenTalep, ...prev])
+      
+      toast({
+        title: "Başarılı",
+        description: "Talep başarıyla eklendi.",
+      })
+    } catch (error) {
+      console.error('Talep eklenirken hata:', error)
+      toast({
+        title: "Hata",
+        description: "Talep eklenirken bir hata oluştu.",
+        variant: "destructive",
+      })
     }
-
-    const yeniTalepler = [...talepler, talep]
-    setTalepler(yeniTalepler)
-    localStorage.setItem("talepler", JSON.stringify(yeniTalepler))
   }
 
-  const handleTalepGuncelle = (id: string, guncelTalep: Partial<Talep>) => {
-    const yeniTalepler = talepler.map((talep) =>
-      talep.id === id ? { ...talep, ...guncelTalep, guncellemeTarihi: new Date().toLocaleDateString("tr-TR") } : talep,
-    )
-    setTalepler(yeniTalepler)
-    localStorage.setItem("talepler", JSON.stringify(yeniTalepler))
+  const handleTalepGuncelle = async (id: string, guncelTalep: Partial<Talep>) => {
+    try {
+      const response = await fetch(`/api/talepler/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(guncelTalep),
+      })
+
+      if (!response.ok) {
+        throw new Error('Talep güncellenemedi')
+      }
+
+      const guncellenenTalep = await response.json()
+      setTalepler(prev => 
+        prev.map(talep => 
+          talep.id === id ? guncellenenTalep : talep
+        )
+      )
+
+      toast({
+        title: "Başarılı",
+        description: "Talep başarıyla güncellendi.",
+      })
+    } catch (error) {
+      console.error('Talep güncellenirken hata:', error)
+      toast({
+        title: "Hata",
+        description: "Talep güncellenirken bir hata oluştu.",
+        variant: "destructive",
+      })
+    }
   }
 
-  const handleTalepSil = (id: string) => {
-    const yeniTalepler = talepler.filter((talep) => talep.id !== id)
-    setTalepler(yeniTalepler)
-    localStorage.setItem("talepler", JSON.stringify(yeniTalepler))
-  }
+  const handleTalepSil = async (id: string) => {
+    try {
+      const response = await fetch(`/api/talepler/${id}`, {
+        method: 'DELETE',
+      })
 
-  const handleTalepleriYukle = (yeniTalepler: Talep[]) => {
-    setTalepler(yeniTalepler)
-    localStorage.setItem("talepler", JSON.stringify(yeniTalepler))
+      if (!response.ok) {
+        throw new Error('Talep silinemedi')
+      }
+
+      setTalepler(prev => prev.filter(talep => talep.id !== id))
+      
+      toast({
+        title: "Başarılı",
+        description: "Talep başarıyla silindi.",
+      })
+    } catch (error) {
+      console.error('Talep silinirken hata:', error)
+      toast({
+        title: "Hata",
+        description: "Talep silinirken bir hata oluştu.",
+        variant: "destructive",
+      })
+    }
   }
 
   return (
@@ -81,12 +164,34 @@ export default function TalepTakipSistemi() {
               <CardDescription>Mevcut talepleri görüntüleyin, düzenleyin ve yönetin</CardDescription>
             </CardHeader>
             <CardContent>
-              <TalepTable
-                talepler={talepler}
-                onTalepGuncelle={handleTalepGuncelle}
-                onTalepSil={handleTalepSil}
-                onTalepleriYukle={handleTalepleriYukle}
-              />
+              {loading ? (
+                <div className="flex justify-center items-center py-8">
+                  <div className="text-center">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
+                    <p className="text-muted-foreground">Talepler yükleniyor...</p>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <p className="text-sm text-muted-foreground">
+                      Toplam {talepler.length} talep bulundu
+                    </p>
+                    <Button 
+                      onClick={talepleriYukle} 
+                      variant="outline" 
+                      size="sm"
+                    >
+                      Yenile
+                    </Button>
+                  </div>
+                  <TalepTable
+                    talepler={talepler}
+                    onTalepGuncelle={handleTalepGuncelle}
+                    onTalepSil={handleTalepSil}
+                  />
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>

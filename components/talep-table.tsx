@@ -18,13 +18,12 @@ interface TalepTableProps {
   talepler: Talep[]
   onTalepGuncelle: (id: string, guncelTalep: Partial<Talep>) => void
   onTalepSil: (id: string) => void
-  onTalepleriYukle: (talepler: Talep[]) => void
 }
 
 type SortField = keyof Talep
 type SortDirection = "asc" | "desc"
 
-export default function TalepTable({ talepler, onTalepGuncelle, onTalepSil, onTalepleriYukle }: TalepTableProps) {
+export default function TalepTable({ talepler, onTalepGuncelle, onTalepSil }: TalepTableProps) {
   const [sortField, setSortField] = useState<SortField>("guncellemeTarihi")
   const [sortDirection, setSortDirection] = useState<SortDirection>("desc")
   const [filters, setFilters] = useState({
@@ -122,7 +121,8 @@ export default function TalepTable({ talepler, onTalepGuncelle, onTalepSil, onTa
           guncellemeTarihi: row["Güncelleme Tarihi"] || new Date().toLocaleDateString("tr-TR"),
         }))
 
-        onTalepleriYukle([...talepler, ...importedTalepler])
+        // Excel import özelliği veritabanı entegrasyonu için kaldırıldı
+        alert("Excel import özelliği şu anda kullanılamıyor. Lütfen talepleri manuel olarak ekleyin.")
         event.target.value = "" // Input'u temizle
       } catch (error) {
         alert("Excel dosyası okunurken hata oluştu. Lütfen dosya formatını kontrol edin.")
