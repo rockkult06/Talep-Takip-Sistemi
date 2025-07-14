@@ -74,6 +74,16 @@ export default function RaporDialog({ talepler }: RaporDialogProps) {
     )
 
     setRaporVerileri(benzersizTalepler)
+
+    // Rapor oluşturulduktan sonra otomatik olarak Excel indirme işlemini tetikle
+    if (benzersizTalepler.length > 0) {
+      // Kısa bir gecikme ile Excel indirme işlemini tetikle
+      setTimeout(() => {
+        raporuIndir()
+      }, 100)
+    } else {
+      alert("Seçilen kriterlere uygun talep bulunamadı")
+    }
   }
 
   const raporuIndir = () => {
@@ -109,7 +119,15 @@ export default function RaporDialog({ talepler }: RaporDialogProps) {
     if (yeniGelenRaporlar) raporTuru.push("YeniGelen")
     if (durumuDegisenTalepler) raporTuru.push("DurumuDegisen")
     
-    XLSX.writeFile(wb, `talep_raporu_${tarihAraligi}_${raporTuru.join("_")}.xlsx`)
+    const dosyaAdi = `talep_raporu_${tarihAraligi}_${raporTuru.join("_")}.xlsx`
+    
+    try {
+      XLSX.writeFile(wb, dosyaAdi)
+      alert(`Rapor başarıyla indirildi: ${dosyaAdi}`)
+    } catch (error) {
+      console.error('Excel dosyası oluşturulurken hata:', error)
+      alert('Rapor indirilirken bir hata oluştu')
+    }
   }
 
   const getDurumBadgeVariant = (durum: string) => {
