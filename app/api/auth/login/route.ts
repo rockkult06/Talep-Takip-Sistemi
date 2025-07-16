@@ -6,6 +6,23 @@ export async function POST(request: NextRequest) {
   try {
     console.log('Login endpoint çağrıldı');
     
+    // Environment variable kontrolü
+    if (!process.env.DATABASE_URL) {
+      console.error('DATABASE_URL environment variable bulunamadı');
+      console.error('Mevcut environment variables:', {
+        NODE_ENV: process.env.NODE_ENV,
+        VERCEL_ENV: process.env.VERCEL_ENV,
+        DATABASE_URL_EXISTS: !!process.env.DATABASE_URL
+      });
+      return NextResponse.json(
+        { 
+          error: 'Veritabanı bağlantısı yapılandırılmamış',
+          details: 'DATABASE_URL environment variable tanımlanmamış. Lütfen .env.local dosyası oluşturun ve veritabanı URL\'inizi ekleyin.'
+        },
+        { status: 500 }
+      );
+    }
+    
     const body = await request.json();
     const { kullaniciAdi, sifre } = body;
 
@@ -18,16 +35,43 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Kullanıcıyı veritabanından bul
-    console.log('Veritabanı sorgusu başlatılıyor...');
-    
-    const kullanicilar = await sql`
-      SELECT id, kullanici_adi, sifre_hash, ad_soyad, rol, aktif
-      FROM kullanicilar 
-      WHERE kullanici_adi = ${kullaniciAdi}
-    `;
+    // Veritabanı bağlantısını test et
+    console.log('Veritabanı bağlantısı test ediliyor...');
+    try {
+      const testResult = await sql`SELECT 1 as test`;
+      console.log('Veritabanı bağlantısı başarılı:', testResult);
+    } catch (dbError) {
+      console.error('Veritabanı bağlantı hatası:', dbError);
+      return NextResponse.json(
+        { 
+          error: 'Veritabanı bağlantısı başarısız',
+          details: dbError instanceof Error ? dbError.message : 'Bilinmeyen veritabanı hatası'
+        },
+        { status: 500 }
+      );
+    }
 
-    console.log('Veritabanı sonucu:', kullanicilar.length, 'kullanıcı bulundu');
+    // Kullanıcıyı veritabanından bul
+    console.log('Kullanıcı sorgusu başlatılıyor...');
+    
+    let kullanicilar;
+    try {
+      kullanicilar = await sql`
+        SELECT id, kullanici_adi, sifre_hash, ad_soyad, rol, aktif
+        FROM kullanicilar 
+        WHERE kullanici_adi = ${kullaniciAdi}
+      `;
+      console.log('Kullanıcı sorgusu başarılı, sonuç sayısı:', kullanicilar.length);
+    } catch (queryError) {
+      console.error('Kullanıcı sorgusu hatası:', queryError);
+      return NextResponse.json(
+        { 
+          error: 'Kullanıcı sorgusu başarısız',
+          details: queryError instanceof Error ? queryError.message : 'Bilinmeyen sorgu hatası'
+        },
+        { status: 500 }
+      );
+    }
 
     if (kullanicilar.length === 0) {
       console.log('Kullanıcı bulunamadı');
@@ -74,25 +118,38 @@ export async function POST(request: NextRequest) {
     console.log('Şifre doğrulandı');
 
     // Son giriş tarihini güncelle
-    await sql`
-      UPDATE kullanicilar 
-      SET son_giris_tarihi = NOW()
-      WHERE id = ${kullanici.id}
-    `;
+    try {
+      await sql`
+        UPDATE kullanicilar 
+        SET son_giris_tarihi = NOW()
+        WHERE id = ${kullanici.id}
+      `;
+      console.log('Son giriş tarihi güncellendi');
+    } catch (updateError) {
+      console.error('Son giriş tarihi güncelleme hatası:', updateError);
+      // Bu hata kritik değil, devam edebiliriz
+    }
 
     // Kullanıcı bilgilerini döndür (şifre hariç)
     const { sifre_hash, ...kullaniciBilgileri } = kullanici;
 
+    console.log('Login başarılı, kullanıcı bilgileri döndürülüyor');
     return NextResponse.json({
       message: 'Giriş başarılı',
       kullanici: kullaniciBilgileri
     });
 
   } catch (error) {
-    console.error('Giriş hatası:', error);
-    console.error('Hata detayı:', error instanceof Error ? error.message : 'Bilinmeyen hata');
+    console.error('Login genel hatası:', error);
+    console.error('Hata türü:', error instanceof Error ? error.constructor.name : typeof error);
+    console.error('Hata mesajı:', error instanceof Error ? error.message : 'Bilinmeyen hata');
+    console.error('Hata stack:', error instanceof Error ? error.stack : 'Stack yok');
+    
     return NextResponse.json(
-      { error: 'Giriş işlemi başarısız oldu', details: error instanceof Error ? error.message : 'Bilinmeyen hata' },
+      { 
+        error: 'Giriş işlemi başarısız oldu', 
+        details: error instanceof Error ? error.message : 'Bilinmeyen hata' 
+      },
       { status: 500 }
     );
   }
