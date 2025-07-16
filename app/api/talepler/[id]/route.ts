@@ -89,7 +89,9 @@ export async function PUT(
             alan_adi, 
             eski_deger, 
             yeni_deger, 
-            aciklama
+            aciklama,
+            kullanici_id,
+            kullanici_adi
           )
           VALUES (
             ${id}, 
@@ -97,7 +99,9 @@ export async function PUT(
             ${alan.label}, 
             ${eskiDeger || ''}, 
             ${yeniDeger || ''}, 
-            ${`${alan.label} alanı güncellendi`}
+            ${`${alan.label} alanı güncellendi`},
+            ${request.headers.get('x-user-id') || null},
+            ${request.headers.get('x-user-name') || 'Sistem'}
           )
         `;
       }
@@ -155,7 +159,9 @@ export async function DELETE(
         alan_adi, 
         eski_deger, 
         yeni_deger, 
-        aciklama
+        aciklama,
+        kullanici_id,
+        kullanici_adi
       )
       VALUES (
         ${id}, 
@@ -163,7 +169,9 @@ export async function DELETE(
         'Talep', 
         ${JSON.stringify(mevcutTalep[0])}, 
         '', 
-        'Talep tamamen silindi'
+        'Talep tamamen silindi',
+        ${request.headers.get('x-user-id') || null},
+        ${request.headers.get('x-user-name') || 'Sistem'}
       )
     `;
 

@@ -7,15 +7,81 @@ import { Button } from "@/components/ui/button"
 import { useToast } from "@/hooks/use-toast"
 import TalepForm from "@/components/talep-form"
 import TalepTable from "@/components/talep-table"
+import Dashboard from "@/components/dashboard"
+import LoginForm from "@/components/login-form"
+import UserManagementDialog from "@/components/user-management-dialog"
+import { Shield, LogOut, User } from "lucide-react"
 import type { Talep } from "@/types/talep"
+
+interface Kullanici {
+  id: number
+  kullanici_adi: string
+  ad_soyad: string
+  rol: string
+  aktif: boolean
+}
 
 export default function TalepTakipSistemi() {
   const [talepler, setTalepler] = useState<Talep[]>([])
   const [loading, setLoading] = useState(true)
+  const [kullanici, setKullanici] = useState<Kullanici | null>(null)
+  const [loginLoading, setLoginLoading] = useState(false)
+  const [loginError, setLoginError] = useState("")
+  const [userManagementOpen, setUserManagementOpen] = useState(false)
   const { toast } = useToast()
+
+  // Giriş işlemi
+  const handleLogin = async (kullaniciAdi: string, sifre: string) => {
+    setLoginLoading(true)
+    setLoginError("")
+    
+    try {
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ kullaniciAdi, sifre }),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Giriş başarısız')
+      }
+
+      const data = await response.json()
+      setKullanici(data.kullanici)
+      
+      toast({
+        title: "Başarılı",
+        description: `Hoş geldiniz, ${data.kullanici.ad_soyad}!`,
+      })
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Giriş başarısız'
+      setLoginError(errorMessage)
+      toast({
+        title: "Hata",
+        description: errorMessage,
+        variant: "destructive",
+      })
+    } finally {
+      setLoginLoading(false)
+    }
+  }
+
+  // Çıkış işlemi
+  const handleLogout = () => {
+    setKullanici(null)
+    toast({
+      title: "Çıkış yapıldı",
+      description: "Başarıyla çıkış yaptınız.",
+    })
+  }
 
   // Talepleri veritabanından yükle
   const talepleriYukle = async () => {
+    if (!kullanici) return
+    
     try {
       setLoading(true)
       const response = await fetch('/api/talepler')
@@ -37,8 +103,10 @@ export default function TalepTakipSistemi() {
   }
 
   useEffect(() => {
-    talepleriYukle()
-  }, [])
+    if (kullanici) {
+      talepleriYukle()
+    }
+  }, [kullanici])
 
   const handleTalepEkle = async (yeniTalep: Omit<Talep, "id" | "guncellemeTarihi">) => {
     try {
@@ -132,18 +200,77 @@ export default function TalepTakipSistemi() {
     }
   }
 
+  // Giriş yapılmamışsa login formunu göster
+  if (!kullanici) {
+    return <LoginForm onLogin={handleLogin} loading={loginLoading} error={loginError} />
+  }
+
   return (
     <div className="container mx-auto p-4 max-w-7xl">
+      {/* Header */}
       <div className="mb-6">
-        <h1 className="text-3xl font-bold text-center mb-2">Talep Takip Sistemi</h1>
-        <p className="text-muted-foreground text-center">Talep girişi, takibi ve yönetimi için kapsamlı sistem</p>
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h1 className="text-3xl font-bold">Talep Takip Sistemi</h1>
+            <p className="text-muted-foreground">Talep girişi, takibi ve yönetimi için kapsamlı sistem</p>
+          </div>
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 text-sm">
+              <User className="w-4 h-4" />
+              <span>{kullanici.ad_soyad}</span>
+              <span className="text-muted-foreground">({kullanici.rol === 'admin' ? 'Admin' : 'Kullanıcı'})</span>
+            </div>
+            {kullanici.rol === 'admin' && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setUserManagementOpen(true)}
+                className="flex items-center gap-2"
+              >
+                <Shield className="w-4 h-4" />
+                Kullanıcı Yönetimi
+              </Button>
+            )}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleLogout}
+              className="flex items-center gap-2"
+            >
+              <LogOut className="w-4 h-4" />
+              Çıkış
+            </Button>
+          </div>
+        </div>
       </div>
 
-      <Tabs defaultValue="form" className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
+      <Tabs defaultValue="dashboard" className="w-full">
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
           <TabsTrigger value="form">Talep Girişi</TabsTrigger>
           <TabsTrigger value="table">Talep Takibi</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="dashboard">
+          <Card>
+            <CardHeader>
+              <CardTitle>Dashboard</CardTitle>
+              <CardDescription>Talep takip sistemi istatistikleri ve analizler</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {loading ? (
+                <div className="flex justify-center items-center py-8">
+                  <div className="text-center">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
+                    <p className="text-muted-foreground">Dashboard yükleniyor...</p>
+                  </div>
+                </div>
+              ) : (
+                <Dashboard talepler={talepler} />
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
 
         <TabsContent value="form">
           <Card>
@@ -197,6 +324,12 @@ export default function TalepTakipSistemi() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Kullanıcı Yönetimi Modalı */}
+      <UserManagementDialog
+        open={userManagementOpen}
+        onOpenChange={setUserManagementOpen}
+      />
     </div>
   )
 }
