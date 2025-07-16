@@ -60,51 +60,56 @@ export async function PUT(
         guncelleme_tarihi as "guncellemeTarihi"
     `;
 
-    // Değişiklikleri logla
-    const alanlar = [
-      { db: 'talep_sahibi', frontend: 'talepSahibi', label: 'Talep Sahibi' },
-      { db: 'talep_sahibi_aciklamasi', frontend: 'talepSahibiAciklamasi', label: 'Talep Sahibi Açıklaması' },
-      { db: 'talep_sahibi_diger_aciklama', frontend: 'talepSahibiDigerAciklama', label: 'Diğer Açıklama' },
-      { db: 'talep_ilcesi', frontend: 'talepIlcesi', label: 'Talep İlçesi' },
-      { db: 'bolge', frontend: 'bolge', label: 'Bölge' },
-      { db: 'hat_no', frontend: 'hatNo', label: 'Hat No' },
-      { db: 'isletici', frontend: 'isletici', label: 'İşletici' },
-      { db: 'talep_ozeti', frontend: 'talepOzeti', label: 'Talep Özeti' },
-      { db: 'talep_iletim_sekli', frontend: 'talepIletimSekli', label: 'Talep İletim Şekli' },
-      { db: 'evrak_tarihi', frontend: 'evrakTarihi', label: 'Evrak Tarihi' },
-      { db: 'evrak_sayisi', frontend: 'evrakSayisi', label: 'Evrak Sayısı' },
-      { db: 'yapilan_is', frontend: 'yapılanIs', label: 'Yapılan İş' },
-      { db: 'talep_durumu', frontend: 'talepDurumu', label: 'Talep Durumu' }
-    ];
+    // Değişiklikleri logla (eğer tablo varsa)
+    try {
+      const alanlar = [
+        { db: 'talep_sahibi', frontend: 'talepSahibi', label: 'Talep Sahibi' },
+        { db: 'talep_sahibi_aciklamasi', frontend: 'talepSahibiAciklamasi', label: 'Talep Sahibi Açıklaması' },
+        { db: 'talep_sahibi_diger_aciklama', frontend: 'talepSahibiDigerAciklama', label: 'Diğer Açıklama' },
+        { db: 'talep_ilcesi', frontend: 'talepIlcesi', label: 'Talep İlçesi' },
+        { db: 'bolge', frontend: 'bolge', label: 'Bölge' },
+        { db: 'hat_no', frontend: 'hatNo', label: 'Hat No' },
+        { db: 'isletici', frontend: 'isletici', label: 'İşletici' },
+        { db: 'talep_ozeti', frontend: 'talepOzeti', label: 'Talep Özeti' },
+        { db: 'talep_iletim_sekli', frontend: 'talepIletimSekli', label: 'Talep İletim Şekli' },
+        { db: 'evrak_tarihi', frontend: 'evrakTarihi', label: 'Evrak Tarihi' },
+        { db: 'evrak_sayisi', frontend: 'evrakSayisi', label: 'Evrak Sayısı' },
+        { db: 'yapilan_is', frontend: 'yapılanIs', label: 'Yapılan İş' },
+        { db: 'talep_durumu', frontend: 'talepDurumu', label: 'Talep Durumu' }
+      ];
 
-    for (const alan of alanlar) {
-      const eskiDeger = eskiTalep[alan.db];
-      const yeniDeger = body[alan.frontend];
-      
-      if (eskiDeger !== yeniDeger) {
-        await sql`
-          INSERT INTO talep_loglari (
-            talep_id, 
-            islem_tipi, 
-            alan_adi, 
-            eski_deger, 
-            yeni_deger, 
-            aciklama,
-            kullanici_id,
-            kullanici_adi
-          )
-          VALUES (
-            ${id}, 
-            'guncelleme', 
-            ${alan.label}, 
-            ${eskiDeger || ''}, 
-            ${yeniDeger || ''}, 
-            ${`${alan.label} alanı güncellendi`},
-            ${request.headers.get('x-user-id') || null},
-            ${request.headers.get('x-user-name') || 'Sistem'}
-          )
-        `;
+      for (const alan of alanlar) {
+        const eskiDeger = eskiTalep[alan.db];
+        const yeniDeger = body[alan.frontend];
+        
+        if (eskiDeger !== yeniDeger) {
+          await sql`
+            INSERT INTO talep_loglari (
+              talep_id, 
+              islem_tipi, 
+              alan_adi, 
+              eski_deger, 
+              yeni_deger, 
+              aciklama,
+              kullanici_id,
+              kullanici_adi
+            )
+            VALUES (
+              ${id}, 
+              'guncelleme', 
+              ${alan.label}, 
+              ${eskiDeger || ''}, 
+              ${yeniDeger || ''}, 
+              ${`${alan.label} alanı güncellendi`},
+              ${request.headers.get('x-user-id') || null},
+              ${request.headers.get('x-user-name') || 'Sistem'}
+            )
+          `;
+        }
       }
+    } catch (logError) {
+      console.error('Log yazma hatası:', logError);
+      // Log hatası güncelleme işlemini durdurmaz
     }
 
     // Eğer durum değiştiyse eski geçmiş tablosuna da kaydet (geriye uyumluluk)
