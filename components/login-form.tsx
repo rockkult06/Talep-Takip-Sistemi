@@ -92,11 +92,7 @@ export default function LoginForm({ onLogin, loading, error }: LoginFormProps) {
             </Button>
           </form>
 
-          <div className="mt-6 text-center text-sm text-muted-foreground">
-            <p>Demo Kullanıcı:</p>
-            <p className="font-medium">Kullanıcı Adı: Admin01</p>
-            <p className="font-medium">Şifre: Planlama2025</p>
-          </div>
+
         </CardContent>
       </Card>
     </div>
