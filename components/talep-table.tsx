@@ -260,10 +260,10 @@ export default function TalepTable({ talepler, onTalepGuncelle, onTalepSil, onTa
   }
 
   const uniqueValues = {
-    talepSahibi: [...new Set(talepler.map((t) => t.talepSahibi))],
-    talepIlcesi: [...new Set(talepler.map((t) => t.talepIlcesi))],
-    talepDurumu: [...new Set(talepler.map((t) => t.talepDurumu))],
-    isletici: [...new Set(talepler.map((t) => t.isletici))],
+    talepSahibi: [...new Set(talepler.map((t) => t.talepSahibi))].filter(Boolean),
+    talepIlcesi: [...new Set(talepler.map((t) => t.talepIlcesi))].filter(Boolean),
+    talepDurumu: [...new Set(talepler.map((t) => t.talepDurumu))].filter(Boolean),
+    isletici: [...new Set(talepler.map((t) => t.isletici))].filter(Boolean),
   }
 
   return (
