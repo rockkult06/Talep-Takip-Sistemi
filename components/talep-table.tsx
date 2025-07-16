@@ -212,12 +212,13 @@ export default function TalepTable({ talepler, onTalepGuncelle, onTalepSil, onTa
               Excel'e Aktar
             </Button>
             <div className="flex items-center gap-2">
-              <Label htmlFor="excel-import" className="cursor-pointer">
-                <Button className="flex items-center gap-2">
-                  <Upload className="w-4 h-4" />
-                  Excel'den Yükle
-                </Button>
-              </Label>
+              <Button 
+                onClick={() => document.getElementById('excel-import')?.click()}
+                className="flex items-center gap-2"
+              >
+                <Upload className="w-4 h-4" />
+                Excel'den Yükle
+              </Button>
               <Input
                 id="excel-import"
                 type="file"
