@@ -636,31 +636,42 @@ export default function TalepTable({ talepler, onTalepGuncelle, onTalepSil, onTa
                     {expandedRows.has(talep.id) && (
                       <TableRow>
                         <TableCell colSpan={compactView ? 7 : 11} className="p-0">
-                          <div className="bg-muted/50 p-4">
+                          <div className="bg-blue-50 border-l-4 border-blue-500 p-4 shadow-sm">
+                            <div className="flex items-center gap-2 mb-3">
+                              <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                              <span className="text-sm font-medium text-blue-700">Detay Bilgileri</span>
+                            </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                               {!compactView && (
-                                <div>
-                                  <strong>Talep Sahibi:</strong> {talep.talepSahibi}
+                                <div className="bg-white p-3 rounded border">
+                                  <strong className="text-gray-700">Talep Sahibi:</strong> 
+                                  <span className="ml-2 text-gray-900">{talep.talepSahibi}</span>
                                 </div>
                               )}
-                              <div>
-                                <strong>İşletici:</strong> {talep.isletici}
+                              <div className="bg-white p-3 rounded border">
+                                <strong className="text-gray-700">İşletici:</strong> 
+                                <span className="ml-2 text-gray-900">{talep.isletici}</span>
                               </div>
-                              <div>
-                                <strong>İletim Şekli:</strong> {talep.talepIletimSekli}
+                              <div className="bg-white p-3 rounded border">
+                                <strong className="text-gray-700">İletim Şekli:</strong> 
+                                <span className="ml-2 text-gray-900">{talep.talepIletimSekli}</span>
                               </div>
-                              <div>
-                                <strong>Evrak Tarihi:</strong> {talep.evrakTarihi || "-"}
+                              <div className="bg-white p-3 rounded border">
+                                <strong className="text-gray-700">Evrak Tarihi:</strong> 
+                                <span className="ml-2 text-gray-900">{talep.evrakTarihi || "-"}</span>
                               </div>
-                              <div>
-                                <strong>Evrak Sayısı:</strong> {talep.evrakSayisi || "-"}
+                              <div className="bg-white p-3 rounded border">
+                                <strong className="text-gray-700">Evrak Sayısı:</strong> 
+                                <span className="ml-2 text-gray-900">{talep.evrakSayisi || "-"}</span>
                               </div>
-                              <div>
-                                <strong>Yapılan İş:</strong> {talep.yapılanIs}
+                              <div className="bg-white p-3 rounded border">
+                                <strong className="text-gray-700">Yapılan İş:</strong> 
+                                <span className="ml-2 text-gray-900">{talep.yapılanIs}</span>
                               </div>
                               {!compactView && (
-                                <div>
-                                  <strong>Güncelleme Tarihi:</strong> {talep.guncellemeTarihi}
+                                <div className="bg-white p-3 rounded border">
+                                  <strong className="text-gray-700">Güncelleme Tarihi:</strong> 
+                                  <span className="ml-2 text-gray-900">{talep.guncellemeTarihi}</span>
                                 </div>
                               )}
                             </div>
