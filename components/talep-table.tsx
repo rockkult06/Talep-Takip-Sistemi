@@ -218,13 +218,31 @@ export default function TalepTable({ talepler, onTalepGuncelle, onTalepSil, onTa
           body: JSON.stringify({ talepler: importedTalepler }),
         })
 
+        const result = await response.json()
+        
         if (!response.ok) {
-          const errorData = await response.json()
-          throw new Error(errorData.error || 'Import işlemi başarısız oldu')
+          throw new Error(result.error || 'Import işlemi başarısız oldu')
         }
 
-        const result = await response.json()
-        alert(`Başarılı: ${result.message}`)
+        // Detaylı sonuç mesajı
+        let mesaj = result.message + '\n\n';
+        
+        if (result.detaylar) {
+          mesaj += `Toplam Satır: ${result.detaylar.toplamSatir}\n`;
+          mesaj += `Başarılı: ${result.detaylar.basarili}\n`;
+          mesaj += `Atlandı: ${result.detaylar.atlanan}\n`;
+          mesaj += `Hatalı: ${result.detaylar.hatali}\n\n`;
+          
+          if (result.detaylar.atlanan > 0) {
+            mesaj += 'Atlanan satırlar eksik veri nedeniyle atlandı.\n';
+          }
+          
+          if (result.detaylar.hatali > 0) {
+            mesaj += 'Hatalı satırlar veritabanı hatası nedeniyle atlandı.\n';
+          }
+        }
+        
+        alert(mesaj)
         
         // Sayfayı yenile
         window.location.reload()

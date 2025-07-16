@@ -88,9 +88,7 @@ export default function TalepForm({ onSubmit }: TalepFormProps) {
     if (!formData.bolge) {
       errors.push("Bölge seçilmelidir")
     }
-    if (!formData.hatNo) {
-      errors.push("Hat No girilmelidir")
-    }
+    // Hat No artık zorunlu değil
     if (!formData.isletici) {
       errors.push("İşletici seçilmelidir")
     }
@@ -261,13 +259,12 @@ export default function TalepForm({ onSubmit }: TalepFormProps) {
 
         {/* Hat No */}
         <div className="space-y-2">
-          <Label htmlFor="hatNo">Hat No *</Label>
+          <Label htmlFor="hatNo">Hat No</Label>
           <Input
             id="hatNo"
             value={formData.hatNo}
             onChange={(e) => handleInputChange("hatNo", e.target.value)}
-            placeholder="Hat numarasını girin"
-            required
+            placeholder="Hat numarasını girin (opsiyonel)"
           />
         </div>
 

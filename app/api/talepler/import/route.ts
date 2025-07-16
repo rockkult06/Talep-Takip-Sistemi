@@ -15,14 +15,33 @@ export async function POST(request: NextRequest) {
     }
 
     const importedTalepler = [];
+    const skippedTalepler = [];
+    const errorTalepler = [];
 
-    for (const talep of talepler) {
+    for (let i = 0; i < talepler.length; i++) {
+      const talep = talepler[i];
       try {
-        // Talep verilerini doğrula
-        if (!talep.talepSahibi || !talep.talepSahibiAciklamasi || !talep.talepIlcesi || 
-            !talep.bolge || !talep.hatNo || !talep.isletici || !talep.talepOzeti || 
-            !talep.talepIletimSekli || !talep.yapılanIs || !talep.talepDurumu) {
-          console.warn('Eksik veri ile talep atlandı:', talep);
+        // Talep verilerini doğrula - daha esnek kontrol
+        const eksikAlanlar = [];
+        
+        if (!talep.talepSahibi) eksikAlanlar.push('Talep Sahibi');
+        if (!talep.talepSahibiAciklamasi) eksikAlanlar.push('Talep Sahibi Açıklaması');
+        if (!talep.talepIlcesi) eksikAlanlar.push('Talep İlçesi');
+        if (!talep.bolge) eksikAlanlar.push('Bölge');
+        // Hat No artık zorunlu değil
+        if (!talep.isletici) eksikAlanlar.push('İşletici');
+        if (!talep.talepOzeti) eksikAlanlar.push('Talep Özeti');
+        if (!talep.talepIletimSekli) eksikAlanlar.push('Talep İletim Şekli');
+        if (!talep.yapılanIs) eksikAlanlar.push('Yapılan İş');
+        if (!talep.talepDurumu) eksikAlanlar.push('Talep Durumu');
+
+        if (eksikAlanlar.length > 0) {
+          console.warn(`Satır ${i + 1}: Eksik alanlar nedeniyle atlandı - ${eksikAlanlar.join(', ')}`);
+          skippedTalepler.push({
+            satir: i + 1,
+            eksikAlanlar,
+            talep
+          });
           continue;
         }
 
@@ -80,14 +99,33 @@ export async function POST(request: NextRequest) {
           importedTalepler.push(yeniTalep[0]);
         }
       } catch (error) {
-        console.error('Talep import hatası:', error, talep);
+        console.error(`Satır ${i + 1}: Talep import hatası:`, error, talep);
+        errorTalepler.push({
+          satir: i + 1,
+          hata: error instanceof Error ? error.message : 'Bilinmeyen hata',
+          talep
+        });
         // Hata durumunda diğer talepleri etkilememesi için devam et
       }
     }
 
+    const toplamSatir = talepler.length;
+    const basarili = importedTalepler.length;
+    const atlanan = skippedTalepler.length;
+    const hatali = errorTalepler.length;
+
     return NextResponse.json({
-      message: `${importedTalepler.length} talep başarıyla import edildi`,
-      importedTalepler
+      success: true,
+      message: `Import tamamlandı: ${basarili} başarılı, ${atlanan} atlandı, ${hatali} hatalı`,
+      detaylar: {
+        toplamSatir,
+        basarili,
+        atlanan,
+        hatali,
+        importedTalepler,
+        skippedTalepler,
+        errorTalepler
+      }
     });
 
   } catch (error) {
