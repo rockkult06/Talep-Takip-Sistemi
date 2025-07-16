@@ -69,8 +69,67 @@ export default function TalepForm({ onSubmit }: TalepFormProps) {
     talepDurumu: "",
   })
 
+  const validateForm = () => {
+    const errors: string[] = []
+
+    // Zorunlu alanları kontrol et
+    if (!formData.talepSahibi) {
+      errors.push("Talep Sahibi seçilmelidir")
+    }
+    if (!formData.talepSahibiAciklamasi) {
+      errors.push("Talep Sahibi Açıklaması seçilmelidir")
+    }
+    if (formData.talepSahibi === "Dış Paydaş" && formData.talepSahibiAciklamasi === "Diğer" && !formData.talepSahibiDigerAciklama) {
+      errors.push("Diğer Açıklama girilmelidir")
+    }
+    if (!formData.talepIlcesi) {
+      errors.push("Talep İlçesi seçilmelidir")
+    }
+    if (!formData.bolge) {
+      errors.push("Bölge seçilmelidir")
+    }
+    if (!formData.hatNo) {
+      errors.push("Hat No girilmelidir")
+    }
+    if (!formData.isletici) {
+      errors.push("İşletici seçilmelidir")
+    }
+    if (!formData.talepOzeti) {
+      errors.push("Talep Özeti girilmelidir")
+    }
+    if (!formData.talepIletimSekli) {
+      errors.push("Talep İletim Şekli seçilmelidir")
+    }
+    if (!formData.yapılanIs) {
+      errors.push("Yapılan İş girilmelidir")
+    }
+    if (!formData.talepDurumu) {
+      errors.push("Talep Durumu seçilmelidir")
+    }
+
+    // EBYS için özel kontroller
+    if (formData.talepIletimSekli === "Elektronik Belge Yönetim Sistemi (EBYS)") {
+      if (!formData.evrakTarihi) {
+        errors.push("EBYS seçildiğinde Evrak Tarihi girilmelidir")
+      }
+      if (!formData.evrakSayisi) {
+        errors.push("EBYS seçildiğinde Evrak Sayısı girilmelidir")
+      }
+    }
+
+    return errors
+  }
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
+    
+    const errors = validateForm()
+    
+    if (errors.length > 0) {
+      alert("Lütfen aşağıdaki eksik alanları doldurun:\n\n" + errors.join("\n"))
+      return
+    }
+
     onSubmit(formData)
 
     // Formu sıfırla
