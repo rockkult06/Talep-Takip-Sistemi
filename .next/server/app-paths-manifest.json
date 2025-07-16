@@ -1,1 +1,5 @@
-{}
+{
+  "/api/auth/login/route": "app/api/auth/login/route.js",
+  "/api/db-test/route": "app/api/db-test/route.js",
+  "/api/setup-db/route": "app/api/setup-db/route.js"
+}

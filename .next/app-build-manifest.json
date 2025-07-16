@@ -1,3 +1,29 @@
 {
-  "pages": {}
+  "pages": {
+    "/api/debug/route": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/api/debug/route.js"
+    ],
+    "/api/test/route": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/api/test/route.js"
+    ],
+    "/api/auth/login/route": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/api/auth/login/route.js"
+    ],
+    "/api/db-test/route": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/api/db-test/route.js"
+    ],
+    "/api/setup-db/route": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/api/setup-db/route.js"
+    ]
+  }
 }
