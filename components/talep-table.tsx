@@ -1,6 +1,6 @@
 "use client"
 
-import type React from "react"
+import React from "react"
 
 import { useState, useMemo } from "react"
 import { Button } from "@/components/ui/button"
@@ -10,7 +10,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { ArrowUpDown, Download, Upload, Trash2, Edit, Eye } from "lucide-react"
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
+import { ArrowUpDown, Download, Upload, Trash2, Edit, Eye, ChevronDown, ChevronRight, LayoutGrid } from "lucide-react"
 import type { Talep } from "@/types/talep"
 import * as XLSX from "xlsx"
 import RaporDialog from "./rapor-dialog"
@@ -30,6 +31,8 @@ type SortDirection = "asc" | "desc"
 export default function TalepTable({ talepler, onTalepGuncelle, onTalepSil, onTalepEkle }: TalepTableProps) {
   const [sortField, setSortField] = useState<SortField>("guncellemeTarihi")
   const [sortDirection, setSortDirection] = useState<SortDirection>("desc")
+  const [compactView, setCompactView] = useState(true)
+  const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set())
   const [filters, setFilters] = useState({
     talepSahibi: "",
     talepIlcesi: "",
@@ -48,6 +51,16 @@ export default function TalepTable({ talepler, onTalepGuncelle, onTalepSil, onTa
       setSortField(field)
       setSortDirection("asc")
     }
+  }
+
+  const toggleRowExpansion = (talepId: string) => {
+    const newExpandedRows = new Set(expandedRows)
+    if (newExpandedRows.has(talepId)) {
+      newExpandedRows.delete(talepId)
+    } else {
+      newExpandedRows.add(talepId)
+    }
+    setExpandedRows(newExpandedRows)
   }
 
   const filteredAndSortedTalepler = useMemo(() => {
@@ -330,19 +343,32 @@ export default function TalepTable({ talepler, onTalepGuncelle, onTalepSil, onTa
       {/* Tablo */}
       <Card>
         <CardHeader>
-          <CardTitle>Talepler ({filteredAndSortedTalepler.length})</CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle>Talepler ({filteredAndSortedTalepler.length})</CardTitle>
+            <Button
+              variant={compactView ? "default" : "outline"}
+              size="sm"
+              onClick={() => setCompactView(!compactView)}
+              className="flex items-center gap-2"
+            >
+              <LayoutGrid className="w-4 h-4" />
+              {compactView ? "Kompakt Görünüm" : "Tam Görünüm"}
+            </Button>
+          </div>
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="cursor-pointer" onClick={() => handleSort("talepSahibi")}>
-                    <div className="flex items-center gap-1">
-                      Talep Sahibi
-                      <ArrowUpDown className="w-4 h-4" />
-                    </div>
-                  </TableHead>
+                  {!compactView && (
+                    <TableHead className="cursor-pointer" onClick={() => handleSort("talepSahibi")}>
+                      <div className="flex items-center gap-1">
+                        Talep Sahibi
+                        <ArrowUpDown className="w-4 h-4" />
+                      </div>
+                    </TableHead>
+                  )}
                   <TableHead className="cursor-pointer" onClick={() => handleSort("talepSahibiAciklamasi")}>
                     <div className="flex items-center gap-1">
                       Açıklama
@@ -367,108 +393,175 @@ export default function TalepTable({ talepler, onTalepGuncelle, onTalepSil, onTa
                       <ArrowUpDown className="w-4 h-4" />
                     </div>
                   </TableHead>
-                  <TableHead className="cursor-pointer" onClick={() => handleSort("isletici")}>
-                    <div className="flex items-center gap-1">
-                      İşletici
-                      <ArrowUpDown className="w-4 h-4" />
-                    </div>
-                  </TableHead>
+                  {!compactView && (
+                    <TableHead className="cursor-pointer" onClick={() => handleSort("isletici")}>
+                      <div className="flex items-center gap-1">
+                        İşletici
+                        <ArrowUpDown className="w-4 h-4" />
+                      </div>
+                    </TableHead>
+                  )}
                   <TableHead>Talep Özeti</TableHead>
-                  <TableHead className="cursor-pointer" onClick={() => handleSort("talepIletimSekli")}>
-                    <div className="flex items-center gap-1">
-                      İletim Şekli
-                      <ArrowUpDown className="w-4 h-4" />
-                    </div>
-                  </TableHead>
-                  <TableHead>Yapılan İş</TableHead>
+                  {!compactView && (
+                    <>
+                      <TableHead className="cursor-pointer" onClick={() => handleSort("talepIletimSekli")}>
+                        <div className="flex items-center gap-1">
+                          İletim Şekli
+                          <ArrowUpDown className="w-4 h-4" />
+                        </div>
+                      </TableHead>
+                      <TableHead>Yapılan İş</TableHead>
+                    </>
+                  )}
                   <TableHead className="cursor-pointer" onClick={() => handleSort("talepDurumu")}>
                     <div className="flex items-center gap-1">
                       Durum
                       <ArrowUpDown className="w-4 h-4" />
                     </div>
                   </TableHead>
-                  <TableHead className="cursor-pointer" onClick={() => handleSort("guncellemeTarihi")}>
-                    <div className="flex items-center gap-1">
-                      Güncelleme
-                      <ArrowUpDown className="w-4 h-4" />
-                    </div>
-                  </TableHead>
+                  {!compactView && (
+                    <TableHead className="cursor-pointer" onClick={() => handleSort("guncellemeTarihi")}>
+                      <div className="flex items-center gap-1">
+                        Güncelleme
+                        <ArrowUpDown className="w-4 h-4" />
+                      </div>
+                    </TableHead>
+                  )}
                   <TableHead>İşlemler</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredAndSortedTalepler.map((talep) => (
-                  <TableRow key={talep.id}>
-                    <TableCell className="font-medium">{talep.talepSahibi}</TableCell>
-                    <TableCell>
-                      <div className="max-w-[200px]">
-                        <div className="truncate">{talep.talepSahibiAciklamasi}</div>
-                        {talep.talepSahibiDigerAciklama && (
-                          <div className="text-sm text-muted-foreground truncate">{talep.talepSahibiDigerAciklama}</div>
-                        )}
-                      </div>
-                    </TableCell>
-                    <TableCell>{talep.talepIlcesi}</TableCell>
-                    <TableCell>{talep.bolge}</TableCell>
-                    <TableCell>{talep.hatNo}</TableCell>
-                    <TableCell>{talep.isletici}</TableCell>
-                    <TableCell>
-                      <div className="max-w-[300px] truncate" title={talep.talepOzeti}>
-                        {talep.talepOzeti}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="max-w-[150px]">
-                        <div className="truncate">{talep.talepIletimSekli}</div>
-                        {talep.evrakTarihi && (
-                          <div className="text-sm text-muted-foreground">
-                            {talep.evrakTarihi} - {talep.evrakSayisi}
+                  <React.Fragment key={talep.id}>
+                    <TableRow>
+                      {!compactView && (
+                        <TableCell className="font-medium">{talep.talepSahibi}</TableCell>
+                      )}
+                      <TableCell>
+                        <div className="max-w-[200px]">
+                          <div className="truncate">{talep.talepSahibiAciklamasi}</div>
+                          {talep.talepSahibiDigerAciklama && (
+                            <div className="text-sm text-muted-foreground truncate">{talep.talepSahibiDigerAciklama}</div>
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell>{talep.talepIlcesi}</TableCell>
+                      <TableCell>{talep.bolge}</TableCell>
+                      <TableCell>{talep.hatNo}</TableCell>
+                      {!compactView && (
+                        <TableCell>{talep.isletici}</TableCell>
+                      )}
+                      <TableCell>
+                        <div className="max-w-[300px] truncate" title={talep.talepOzeti}>
+                          {talep.talepOzeti}
+                        </div>
+                      </TableCell>
+                      {!compactView && (
+                        <>
+                          <TableCell>
+                            <div className="max-w-[150px]">
+                              <div className="truncate">{talep.talepIletimSekli}</div>
+                              {talep.evrakTarihi && (
+                                <div className="text-sm text-muted-foreground">
+                                  {talep.evrakTarihi} - {talep.evrakSayisi}
+                                </div>
+                              )}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="max-w-[300px] truncate" title={talep.yapılanIs}>
+                              {talep.yapılanIs}
+                            </div>
+                          </TableCell>
+                        </>
+                      )}
+                      <TableCell>
+                        <Badge variant={getDurumBadgeVariant(talep.talepDurumu)}>{talep.talepDurumu}</Badge>
+                      </TableCell>
+                      {!compactView && (
+                        <TableCell>{talep.guncellemeTarihi}</TableCell>
+                      )}
+                      <TableCell>
+                        <div className="flex gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => toggleRowExpansion(talep.id)}
+                            title="Detayları Göster/Gizle"
+                          >
+                            {expandedRows.has(talep.id) ? (
+                              <ChevronDown className="w-4 h-4" />
+                            ) : (
+                              <ChevronRight className="w-4 h-4" />
+                            )}
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleViewTalep(talep)}
+                            title="Görüntüle"
+                          >
+                            <Eye className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleEditTalep(talep)}
+                            title="Düzenle"
+                          >
+                            <Edit className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              if (confirm("Bu talebi silmek istediğinizden emin misiniz?")) {
+                                onTalepSil(talep.id)
+                              }
+                            }}
+                            title="Sil"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                    {expandedRows.has(talep.id) && (
+                      <TableRow>
+                        <TableCell colSpan={compactView ? 7 : 11} className="p-0">
+                          <div className="bg-muted/50 p-4">
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                              {!compactView && (
+                                <div>
+                                  <strong>Talep Sahibi:</strong> {talep.talepSahibi}
+                                </div>
+                              )}
+                              <div>
+                                <strong>İşletici:</strong> {talep.isletici}
+                              </div>
+                              <div>
+                                <strong>İletim Şekli:</strong> {talep.talepIletimSekli}
+                              </div>
+                              <div>
+                                <strong>Evrak Tarihi:</strong> {talep.evrakTarihi || "-"}
+                              </div>
+                              <div>
+                                <strong>Evrak Sayısı:</strong> {talep.evrakSayisi || "-"}
+                              </div>
+                              <div>
+                                <strong>Yapılan İş:</strong> {talep.yapılanIs}
+                              </div>
+                              {!compactView && (
+                                <div>
+                                  <strong>Güncelleme Tarihi:</strong> {talep.guncellemeTarihi}
+                                </div>
+                              )}
+                            </div>
                           </div>
-                        )}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="max-w-[300px] truncate" title={talep.yapılanIs}>
-                        {talep.yapılanIs}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant={getDurumBadgeVariant(talep.talepDurumu)}>{talep.talepDurumu}</Badge>
-                    </TableCell>
-                    <TableCell>{talep.guncellemeTarihi}</TableCell>
-                    <TableCell>
-                      <div className="flex gap-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleViewTalep(talep)}
-                          title="Görüntüle"
-                        >
-                          <Eye className="w-4 h-4" />
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleEditTalep(talep)}
-                          title="Düzenle"
-                        >
-                          <Edit className="w-4 h-4" />
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => {
-                            if (confirm("Bu talebi silmek istediğinizden emin misiniz?")) {
-                              onTalepSil(talep.id)
-                            }
-                          }}
-                          title="Sil"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </React.Fragment>
                 ))}
               </TableBody>
             </Table>
