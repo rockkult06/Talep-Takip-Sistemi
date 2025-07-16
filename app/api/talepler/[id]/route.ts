@@ -151,29 +151,34 @@ export async function DELETE(
       RETURNING *
     `;
 
-    // Silme işlemini logla
-    await sql`
-      INSERT INTO talep_loglari (
-        talep_id, 
-        islem_tipi, 
-        alan_adi, 
-        eski_deger, 
-        yeni_deger, 
-        aciklama,
-        kullanici_id,
-        kullanici_adi
-      )
-      VALUES (
-        ${id}, 
-        'silme', 
-        'Talep', 
-        ${JSON.stringify(mevcutTalep[0])}, 
-        '', 
-        'Talep tamamen silindi',
-        ${request.headers.get('x-user-id') || null},
-        ${request.headers.get('x-user-name') || 'Sistem'}
-      )
-    `;
+    // Silme işlemini logla (eğer tablo varsa)
+    try {
+      await sql`
+        INSERT INTO talep_loglari (
+          talep_id, 
+          islem_tipi, 
+          alan_adi, 
+          eski_deger, 
+          yeni_deger, 
+          aciklama,
+          kullanici_id,
+          kullanici_adi
+        )
+        VALUES (
+          ${id}, 
+          'silme', 
+          'Talep', 
+          ${JSON.stringify(mevcutTalep[0])}, 
+          '', 
+          'Talep tamamen silindi',
+          ${request.headers.get('x-user-id') || null},
+          ${request.headers.get('x-user-name') || 'Sistem'}
+        )
+      `;
+    } catch (logError) {
+      console.error('Log yazma hatası:', logError);
+      // Log hatası silme işlemini durdurmaz
+    }
 
     return NextResponse.json({ message: 'Talep başarıyla silindi' });
   } catch (error) {

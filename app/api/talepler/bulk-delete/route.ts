@@ -32,40 +32,46 @@ export async function POST(request: NextRequest) {
       RETURNING *
     `;
 
-    // Silme işlemlerini logla
-    for (const talep of silinecekTalepler) {
-      await sql`
-        INSERT INTO talep_loglari (
-          talep_id, 
-          islem_tipi, 
-          alan_adi, 
-          eski_deger, 
-          yeni_deger, 
-          aciklama,
-          kullanici_id,
-          kullanici_adi
-        )
-        VALUES (
-          ${talep.id}, 
-          'toplu_silme', 
-          'Talep', 
-          ${JSON.stringify(talep)}, 
-          '', 
-          'Talep toplu silme işlemi ile silindi',
-          ${request.headers.get('x-user-id') || null},
-          ${request.headers.get('x-user-name') || 'Sistem'}
-        )
-      `;
+    // Silme işlemlerini logla (eğer tablo varsa)
+    try {
+      for (const talep of silinecekTalepler) {
+        await sql`
+          INSERT INTO talep_loglari (
+            talep_id, 
+            islem_tipi, 
+            alan_adi, 
+            eski_deger, 
+            yeni_deger, 
+            aciklama,
+            kullanici_id,
+            kullanici_adi
+          )
+          VALUES (
+            ${talep.id}, 
+            'toplu_silme', 
+            'Talep', 
+            ${JSON.stringify(talep)}, 
+            '', 
+            'Talep toplu silme işlemi ile silindi',
+            ${request.headers.get('x-user-id') || null},
+            ${request.headers.get('x-user-name') || 'Sistem'}
+          )
+        `;
+      }
+    } catch (logError) {
+      console.error('Log yazma hatası:', logError);
+      // Log hatası silme işlemini durdurmaz
     }
 
     return NextResponse.json({ 
+      success: true,
       message: `${silinenTalepler.length} talep başarıyla silindi`,
       deletedCount: silinenTalepler.length
     });
   } catch (error) {
     console.error('Toplu talep silme hatası:', error);
     return NextResponse.json(
-      { error: 'Talepler silinemedi' },
+      { error: 'Talepler silinemedi: ' + (error instanceof Error ? error.message : 'Bilinmeyen hata') },
       { status: 500 }
     );
   }
