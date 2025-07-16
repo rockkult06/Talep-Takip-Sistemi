@@ -345,15 +345,42 @@ export default function TalepTable({ talepler, onTalepGuncelle, onTalepSil, onTa
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle>Talepler ({filteredAndSortedTalepler.length})</CardTitle>
-            <Button
-              variant={compactView ? "default" : "outline"}
-              size="sm"
-              onClick={() => setCompactView(!compactView)}
-              className="flex items-center gap-2"
-            >
-              <LayoutGrid className="w-4 h-4" />
-              {compactView ? "Kompakt Görünüm" : "Tam Görünüm"}
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                variant={compactView ? "default" : "outline"}
+                size="sm"
+                onClick={() => setCompactView(!compactView)}
+                className="flex items-center gap-2"
+              >
+                <LayoutGrid className="w-4 h-4" />
+                {compactView ? "Kompakt Görünüm" : "Tam Görünüm"}
+              </Button>
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={async () => {
+                  if (confirm("Tüm 'Dış Taşıt' değerlerini 'İzTaşıt' olarak güncellemek istediğinizden emin misiniz?")) {
+                    try {
+                      const response = await fetch('/api/talepler/update-isletici', {
+                        method: 'POST',
+                      })
+                      const result = await response.json()
+                      if (result.success) {
+                        alert("İşletici değerleri başarıyla güncellendi. Sayfa yenilenecek.")
+                        window.location.reload()
+                      } else {
+                        alert("Güncelleme sırasında hata oluştu: " + result.error)
+                      }
+                    } catch (error) {
+                      alert("Güncelleme sırasında hata oluştu")
+                    }
+                  }
+                }}
+                className="flex items-center gap-2"
+              >
+                İşletici Düzelt
+              </Button>
+            </div>
           </div>
         </CardHeader>
         <CardContent>
