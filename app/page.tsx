@@ -154,6 +154,8 @@ export default function TalepTakipSistemi() {
       }
 
       const guncellenenTalep = await response.json()
+      
+      // State'i güncelle
       setTalepler(prev => 
         prev.map(talep => 
           talep.id === id ? guncellenenTalep : talep
@@ -164,6 +166,12 @@ export default function TalepTakipSistemi() {
         title: "Başarılı",
         description: "Talep başarıyla güncellendi.",
       })
+
+      // Sayfayı yenile
+      setTimeout(() => {
+        window.location.reload()
+      }, 1000)
+
     } catch (error) {
       console.error('Talep güncellenirken hata:', error)
       toast({

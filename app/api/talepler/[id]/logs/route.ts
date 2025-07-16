@@ -18,7 +18,7 @@ export async function GET(
         yeni_deger,
         aciklama,
         islem_tarihi,
-        kullanici
+        kullanici_adi as kullanici
       FROM talep_loglari 
       WHERE talep_id = ${id}
       ORDER BY islem_tarihi DESC

@@ -456,6 +456,28 @@ export default function TalepTable({ talepler, onTalepGuncelle, onTalepSil, onTa
                   Seçilenleri Sil ({selectedTalepler.size})
                 </Button>
               )}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={async () => {
+                  try {
+                    const response = await fetch('/api/create-logs-table', {
+                      method: 'POST',
+                    })
+                    const result = await response.json()
+                    if (result.success) {
+                      alert("Log tablosu oluşturuldu!")
+                    } else {
+                      alert("Hata: " + result.error)
+                    }
+                  } catch (error) {
+                    alert("Log tablosu oluşturulurken hata oluştu")
+                  }
+                }}
+                className="flex items-center gap-2"
+              >
+                Log Tablosu Oluştur
+              </Button>
             </div>
           </div>
         </CardHeader>
@@ -741,11 +763,11 @@ export default function TalepTable({ talepler, onTalepGuncelle, onTalepSil, onTa
                                             </div>
                                           </div>
                                         )}
-                                        {log.kullanici && (
-                                          <div className="text-xs text-gray-500 mt-1">
-                                            <strong>Kullanıcı:</strong> {log.kullanici}
-                                          </div>
-                                        )}
+                                                                                 {log.kullanici && log.kullanici !== 'Sistem' && (
+                                           <div className="text-xs text-gray-500 mt-1">
+                                             <strong>Kullanıcı:</strong> {log.kullanici}
+                                           </div>
+                                         )}
                                       </div>
                                     ))}
                                   </div>
