@@ -317,6 +317,7 @@ export default function TalepTakipSistemi() {
                     onTalepGuncelle={handleTalepGuncelle}
                     onTalepSil={handleTalepSil}
                     onTalepEkle={handleTalepEkle}
+                    onTalepleriYenile={talepleriYukle}
                   />
                 </div>
               )}

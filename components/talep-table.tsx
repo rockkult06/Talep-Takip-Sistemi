@@ -24,12 +24,13 @@ interface TalepTableProps {
   onTalepGuncelle: (id: string, guncelTalep: Partial<Talep>) => void
   onTalepSil: (id: string) => void
   onTalepEkle?: (yeniTalep: Omit<Talep, "id" | "guncellemeTarihi">) => void
+  onTalepleriYenile?: () => void
 }
 
 type SortField = keyof Talep
 type SortDirection = "asc" | "desc"
 
-export default function TalepTable({ talepler, onTalepGuncelle, onTalepSil, onTalepEkle }: TalepTableProps) {
+export default function TalepTable({ talepler, onTalepGuncelle, onTalepSil, onTalepEkle, onTalepleriYenile }: TalepTableProps) {
   const [sortField, setSortField] = useState<SortField>("guncellemeTarihi")
   const [sortDirection, setSortDirection] = useState<SortDirection>("desc")
   const [compactView, setCompactView] = useState(true)
@@ -105,12 +106,16 @@ export default function TalepTable({ talepler, onTalepGuncelle, onTalepSil, onTa
       const result = await response.json()
       
       if (response.ok) {
-        alert(result.message)
+        alert(result.message || `${selectedTalepler.size} talep başarıyla silindi`)
         setSelectedTalepler(new Set())
-        // Sayfayı yenile
-        window.location.reload()
+        // Ana sayfadaki state'i güncelle
+        if (onTalepleriYenile) {
+          onTalepleriYenile()
+        } else {
+          window.location.reload()
+        }
       } else {
-        alert("Silme işlemi başarısız: " + result.error)
+        alert("Silme işlemi başarısız: " + (result.error || 'Bilinmeyen hata'))
       }
     } catch (error) {
       console.error('Toplu silme hatası:', error)
@@ -602,12 +607,18 @@ export default function TalepTable({ talepler, onTalepGuncelle, onTalepSil, onTa
                                   method: 'DELETE',
                                 })
                                 
+                                const result = await response.json()
+                                
                                 if (response.ok) {
                                   alert("Talep başarıyla silindi")
-                                  window.location.reload()
+                                  // Ana sayfadaki state'i güncelle
+                                  if (onTalepleriYenile) {
+                                    onTalepleriYenile()
+                                  } else {
+                                    window.location.reload()
+                                  }
                                 } else {
-                                  const result = await response.json()
-                                  alert("Silme işlemi başarısız: " + result.error)
+                                  alert("Silme işlemi başarısız: " + (result.error || 'Bilinmeyen hata'))
                                 }
                               } catch (error) {
                                 console.error('Silme hatası:', error)
