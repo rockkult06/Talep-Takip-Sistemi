@@ -693,6 +693,16 @@ export default function TalepTable({ talepler, onTalepGuncelle, onTalepSil, onTa
                                 </div>
                               )}
                             </div>
+                            
+                            {/* Talep Özeti - Tam Hali */}
+                            <div className="mt-4">
+                              <div className="bg-white p-4 rounded border">
+                                <strong className="text-gray-700 block mb-2">Talep Özeti (Tam Hali):</strong>
+                                <div className="text-gray-900 whitespace-pre-wrap bg-gray-50 p-3 rounded">
+                                  {talep.talepOzeti}
+                                </div>
+                              </div>
+                            </div>
                           </div>
                         </TableCell>
                       </TableRow>
