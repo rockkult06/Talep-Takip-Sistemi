@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
         
         if (!talep.talepSahibi) eksikAlanlar.push('Talep Sahibi');
         if (!talep.talepSahibiAciklamasi) eksikAlanlar.push('Talep Sahibi Açıklaması');
-        if (!talep.talepIlcesi) eksikAlanlar.push('Talep İlçesi');
+        // İlçe artık zorunlu değil
         if (!talep.bolge) eksikAlanlar.push('Bölge');
         // Hat No artık zorunlu değil
         if (!talep.isletici) eksikAlanlar.push('İşletici');

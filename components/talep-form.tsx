@@ -82,9 +82,7 @@ export default function TalepForm({ onSubmit }: TalepFormProps) {
     if (formData.talepSahibi === "Dış Paydaş" && formData.talepSahibiAciklamasi === "Diğer" && !formData.talepSahibiDigerAciklama) {
       errors.push("Diğer Açıklama girilmelidir")
     }
-    if (!formData.talepIlcesi) {
-      errors.push("Talep İlçesi seçilmelidir")
-    }
+    // İlçe artık zorunlu değil
     if (!formData.bolge) {
       errors.push("Bölge seçilmelidir")
     }
@@ -225,10 +223,10 @@ export default function TalepForm({ onSubmit }: TalepFormProps) {
 
         {/* Talep İlçesi */}
         <div className="space-y-2">
-          <Label htmlFor="talepIlcesi">Talep İlçesi *</Label>
+          <Label htmlFor="talepIlcesi">Talep İlçesi</Label>
           <Select value={formData.talepIlcesi} onValueChange={(value) => handleInputChange("talepIlcesi", value)}>
             <SelectTrigger>
-              <SelectValue placeholder="İlçe seçin" />
+              <SelectValue placeholder="İlçe seçin (opsiyonel)" />
             </SelectTrigger>
             <SelectContent>
               {IZMIR_ILCELERI.map((ilce) => (
