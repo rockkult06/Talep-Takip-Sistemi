@@ -221,7 +221,7 @@ export default function TalepForm({ onSubmit }: TalepFormProps) {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="Eshot">Eshot</SelectItem>
-              <SelectItem value="Dış Taşıt">İzTaşıt</SelectItem>
+              <SelectItem value="İzTaşıt">İzTaşıt</SelectItem>
             </SelectContent>
           </Select>
         </div>
