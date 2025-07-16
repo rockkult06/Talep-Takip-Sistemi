@@ -36,6 +36,7 @@ export default function TalepTable({ talepler, onTalepGuncelle, onTalepSil, onTa
   const [compactView, setCompactView] = useState(true)
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set())
   const [selectedTalepler, setSelectedTalepler] = useState<Set<string>>(new Set())
+  const [talepLoglari, setTalepLoglari] = useState<{[key: string]: any[]}>({})
   const [filters, setFilters] = useState({
     talepSahibi: "",
     talepIlcesi: "",
@@ -56,12 +57,22 @@ export default function TalepTable({ talepler, onTalepGuncelle, onTalepSil, onTa
     }
   }
 
-  const toggleRowExpansion = (talepId: string) => {
+  const toggleRowExpansion = async (talepId: string) => {
     const newExpandedRows = new Set(expandedRows)
     if (newExpandedRows.has(talepId)) {
       newExpandedRows.delete(talepId)
     } else {
       newExpandedRows.add(talepId)
+      // Logları getir
+      try {
+        const response = await fetch(`/api/talepler/${talepId}/logs`)
+        if (response.ok) {
+          const logs = await response.json()
+          setTalepLoglari(prev => ({ ...prev, [talepId]: logs }))
+        }
+      } catch (error) {
+        console.error('Loglar getirilirken hata:', error)
+      }
     }
     setExpandedRows(newExpandedRows)
   }
@@ -703,6 +714,44 @@ export default function TalepTable({ talepler, onTalepGuncelle, onTalepSil, onTa
                                 </div>
                               </div>
                             </div>
+                            
+                            {/* Talep Logları */}
+                            {talepLoglari[talep.id] && talepLoglari[talep.id].length > 0 && (
+                              <div className="mt-4">
+                                <div className="bg-white p-4 rounded border">
+                                  <strong className="text-gray-700 block mb-3">Değişiklik Geçmişi:</strong>
+                                  <div className="space-y-3">
+                                    {talepLoglari[talep.id].map((log, index) => (
+                                      <div key={log.id || index} className="border-l-4 border-blue-500 pl-3 py-2 bg-blue-50">
+                                        <div className="flex justify-between items-start mb-1">
+                                          <span className="text-sm font-medium text-gray-700">
+                                            {log.alan_adi} {log.islem_tipi === 'guncelleme' ? 'güncellendi' : log.islem_tipi === 'silme' ? 'silindi' : 'oluşturuldu'}
+                                          </span>
+                                          <span className="text-xs text-gray-500">
+                                            {new Date(log.islem_tarihi).toLocaleString('tr-TR')}
+                                          </span>
+                                        </div>
+                                        {log.islem_tipi === 'guncelleme' && (
+                                          <div className="text-xs text-gray-600">
+                                            <div className="mb-1">
+                                              <strong>Eski:</strong> {log.eski_deger || '-'}
+                                            </div>
+                                            <div>
+                                              <strong>Yeni:</strong> {log.yeni_deger || '-'}
+                                            </div>
+                                          </div>
+                                        )}
+                                        {log.kullanici && (
+                                          <div className="text-xs text-gray-500 mt-1">
+                                            <strong>Kullanıcı:</strong> {log.kullanici}
+                                          </div>
+                                        )}
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              </div>
+                            )}
                           </div>
                         </TableCell>
                       </TableRow>
