@@ -136,7 +136,7 @@ export default function TalepTable({ talepler, onTalepGuncelle, onTalepSil, onTa
           talepDurumu: row["Talep Durumu"] || "Değerlendirilecek",
         }))
 
-        // API'ye gönder
+        // Verileri API'ye gönder
         const response = await fetch('/api/talepler/import', {
           method: 'POST',
           headers: {
@@ -145,22 +145,22 @@ export default function TalepTable({ talepler, onTalepGuncelle, onTalepSil, onTa
           body: JSON.stringify({ talepler: importedTalepler }),
         })
 
-        if (response.ok) {
-          const result = await response.json()
-          alert(`Başarılı! ${result.message}`)
-          
-          // Sayfayı yenile
-          window.location.reload()
-        } else {
-          const error = await response.json()
-          alert(`Hata: ${error.error}`)
+        if (!response.ok) {
+          const errorData = await response.json()
+          throw new Error(errorData.error || 'Import işlemi başarısız oldu')
         }
 
-        event.target.value = "" // Input'u temizle
+        const result = await response.json()
+        alert(`Başarılı: ${result.message}`)
+        
+        // Sayfayı yenile
+        window.location.reload()
+        
       } catch (error) {
         console.error('Excel import hatası:', error)
-        alert("Excel dosyası okunurken hata oluştu. Lütfen dosya formatını kontrol edin.")
-        event.target.value = ""
+        alert(`Excel import hatası: ${error instanceof Error ? error.message : 'Bilinmeyen hata'}`)
+      } finally {
+        event.target.value = "" // Input'u temizle
       }
     }
     reader.readAsArrayBuffer(file)

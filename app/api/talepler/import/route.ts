@@ -18,6 +18,15 @@ export async function POST(request: NextRequest) {
 
     for (const talep of talepler) {
       try {
+        // Talep verilerini doğrula
+        if (!talep.talepSahibi || !talep.talepSahibiAciklamasi || !talep.talepIlcesi || 
+            !talep.bolge || !talep.hatNo || !talep.isletici || !talep.talepOzeti || 
+            !talep.talepIletimSekli || !talep.yapılanIs || !talep.talepDurumu) {
+          console.warn('Eksik veri ile talep atlandı:', talep);
+          continue;
+        }
+
+        // Talebi veritabanına ekle
         const yeniTalep = await sql`
           INSERT INTO talepler (
             talep_sahibi,
@@ -71,8 +80,8 @@ export async function POST(request: NextRequest) {
           importedTalepler.push(yeniTalep[0]);
         }
       } catch (error) {
-        console.error('Talep import hatası:', error);
-        // Hata durumunda devam et, diğer talepleri import etmeye çalış
+        console.error('Talep import hatası:', error, talep);
+        // Hata durumunda diğer talepleri etkilememesi için devam et
       }
     }
 
@@ -80,6 +89,7 @@ export async function POST(request: NextRequest) {
       message: `${importedTalepler.length} talep başarıyla import edildi`,
       importedTalepler
     });
+
   } catch (error) {
     console.error('Excel import hatası:', error);
     return NextResponse.json(
