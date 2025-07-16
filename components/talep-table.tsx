@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import { Checkbox } from "@/components/ui/checkbox"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { ArrowUpDown, Download, Upload, Trash2, Edit, Eye, ChevronDown, ChevronRight, LayoutGrid } from "lucide-react"
 import type { Talep } from "@/types/talep"
@@ -33,6 +34,7 @@ export default function TalepTable({ talepler, onTalepGuncelle, onTalepSil, onTa
   const [sortDirection, setSortDirection] = useState<SortDirection>("desc")
   const [compactView, setCompactView] = useState(true)
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set())
+  const [selectedTalepler, setSelectedTalepler] = useState<Set<string>>(new Set())
   const [filters, setFilters] = useState({
     talepSahibi: "",
     talepIlcesi: "",
@@ -61,6 +63,59 @@ export default function TalepTable({ talepler, onTalepGuncelle, onTalepSil, onTa
       newExpandedRows.add(talepId)
     }
     setExpandedRows(newExpandedRows)
+  }
+
+  const toggleTalepSelection = (talepId: string) => {
+    const newSelectedTalepler = new Set(selectedTalepler)
+    if (newSelectedTalepler.has(talepId)) {
+      newSelectedTalepler.delete(talepId)
+    } else {
+      newSelectedTalepler.add(talepId)
+    }
+    setSelectedTalepler(newSelectedTalepler)
+  }
+
+  const toggleAllTalepler = () => {
+    if (selectedTalepler.size === filteredAndSortedTalepler.length) {
+      setSelectedTalepler(new Set())
+    } else {
+      setSelectedTalepler(new Set(filteredAndSortedTalepler.map(t => t.id)))
+    }
+  }
+
+  const handleBulkDelete = async () => {
+    if (selectedTalepler.size === 0) {
+      alert("Lütfen silinecek talepleri seçin")
+      return
+    }
+
+    if (!confirm(`${selectedTalepler.size} talebi silmek istediğinizden emin misiniz?`)) {
+      return
+    }
+
+    try {
+      const response = await fetch('/api/talepler/bulk-delete', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ ids: Array.from(selectedTalepler) }),
+      })
+
+      const result = await response.json()
+      
+      if (response.ok) {
+        alert(result.message)
+        setSelectedTalepler(new Set())
+        // Sayfayı yenile
+        window.location.reload()
+      } else {
+        alert("Silme işlemi başarısız: " + result.error)
+      }
+    } catch (error) {
+      console.error('Toplu silme hatası:', error)
+      alert("Silme işlemi sırasında hata oluştu")
+    }
   }
 
   const filteredAndSortedTalepler = useMemo(() => {
@@ -380,6 +435,17 @@ export default function TalepTable({ talepler, onTalepGuncelle, onTalepSil, onTa
               >
                 İşletici Düzelt
               </Button>
+              {selectedTalepler.size > 0 && (
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={handleBulkDelete}
+                  className="flex items-center gap-2"
+                >
+                  <Trash2 className="w-4 h-4" />
+                  Seçilenleri Sil ({selectedTalepler.size})
+                </Button>
+              )}
             </div>
           </div>
         </CardHeader>
@@ -388,6 +454,12 @@ export default function TalepTable({ talepler, onTalepGuncelle, onTalepSil, onTa
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead className="w-12">
+                    <Checkbox
+                      checked={selectedTalepler.size === filteredAndSortedTalepler.length && filteredAndSortedTalepler.length > 0}
+                      onCheckedChange={toggleAllTalepler}
+                    />
+                  </TableHead>
                   {!compactView && (
                     <TableHead className="cursor-pointer" onClick={() => handleSort("talepSahibi")}>
                       <div className="flex items-center gap-1">
@@ -461,6 +533,12 @@ export default function TalepTable({ talepler, onTalepGuncelle, onTalepSil, onTa
                 {filteredAndSortedTalepler.map((talep) => (
                   <React.Fragment key={talep.id}>
                     <TableRow>
+                      <TableCell>
+                        <Checkbox
+                          checked={selectedTalepler.has(talep.id)}
+                          onCheckedChange={() => toggleTalepSelection(talep.id)}
+                        />
+                      </TableCell>
                       {!compactView && (
                         <TableCell className="font-medium">{talep.talepSahibi}</TableCell>
                       )}
@@ -538,18 +616,33 @@ export default function TalepTable({ talepler, onTalepGuncelle, onTalepSil, onTa
                           >
                             <Edit className="w-4 h-4" />
                           </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => {
-                              if (confirm("Bu talebi silmek istediğinizden emin misiniz?")) {
-                                onTalepSil(talep.id)
+                                                  <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={async () => {
+                            if (confirm("Bu talebi silmek istediğinizden emin misiniz?")) {
+                              try {
+                                const response = await fetch(`/api/talepler/${talep.id}`, {
+                                  method: 'DELETE',
+                                })
+                                
+                                if (response.ok) {
+                                  alert("Talep başarıyla silindi")
+                                  window.location.reload()
+                                } else {
+                                  const result = await response.json()
+                                  alert("Silme işlemi başarısız: " + result.error)
+                                }
+                              } catch (error) {
+                                console.error('Silme hatası:', error)
+                                alert("Silme işlemi sırasında hata oluştu")
                               }
-                            }}
-                            title="Sil"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
+                            }
+                          }}
+                          title="Sil"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
                         </div>
                       </TableCell>
                     </TableRow>
