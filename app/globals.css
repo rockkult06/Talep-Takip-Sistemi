@@ -14,7 +14,7 @@ body {
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
+    --background: 0 0% 98%;
     --foreground: 0 0% 3.9%;
     --card: 0 0% 100%;
     --card-foreground: 0 0% 3.9%;
@@ -38,7 +38,7 @@ body {
     --chart-3: 197 37% 24%;
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
-    --radius: 0.5rem;
+    --radius: 1.5rem;
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
     --sidebar-primary: 240 5.9% 10%;
@@ -90,5 +90,27 @@ body {
   }
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+@layer components {
+  .modern-card {
+    @apply bg-white/80 backdrop-blur-sm border border-white/20 rounded-3xl shadow-lg shadow-black/5;
+  }
+  
+  .modern-header {
+    @apply bg-white/90 backdrop-blur-md border-b border-white/30 shadow-sm;
+  }
+  
+  .modern-button {
+    @apply bg-white/80 backdrop-blur-sm border border-white/30 rounded-2xl shadow-sm hover:bg-white/90 transition-all duration-200;
+  }
+  
+  .modern-input {
+    @apply bg-white/60 backdrop-blur-sm border border-white/30 rounded-2xl focus:bg-white/80 transition-all duration-200;
+  }
+  
+  .modern-tabs {
+    @apply bg-white/70 backdrop-blur-sm border border-white/20 rounded-2xl shadow-sm;
   }
 }

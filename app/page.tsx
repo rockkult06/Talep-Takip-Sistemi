@@ -215,19 +215,19 @@ export default function TalepTakipSistemi() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
       {/* Sticky Header */}
-      <div className="sticky top-0 z-50 bg-white shadow-sm border-b border-gray-200">
-        <div className="container mx-auto p-4 max-w-7xl">
-          <div className="flex items-center justify-between mb-4">
+      <div className="sticky top-0 z-50 modern-header">
+        <div className="container mx-auto p-6 max-w-7xl">
+          <div className="flex items-center justify-between mb-6">
             <div>
-              <h1 className="text-3xl font-bold">Talep Takip Sistemi</h1>
-              <p className="text-muted-foreground">Talep girişi, takibi ve yönetimi için kapsamlı sistem</p>
+              <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Talep Takip Sistemi</h1>
+              <p className="text-muted-foreground text-lg">Talep girişi, takibi ve yönetimi için kapsamlı sistem</p>
             </div>
             <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2 text-sm">
-                <User className="w-4 h-4" />
-                <span>{kullanici.ad_soyad}</span>
+              <div className="flex items-center gap-3 text-sm modern-card px-4 py-2">
+                <User className="w-5 h-5 text-blue-600" />
+                <span className="font-medium">{kullanici.ad_soyad}</span>
                 <span className="text-muted-foreground">({kullanici.rol === 'admin' ? 'Admin' : 'Kullanıcı'})</span>
               </div>
               {kullanici.rol === 'admin' && (
@@ -235,7 +235,7 @@ export default function TalepTakipSistemi() {
                   variant="outline"
                   size="sm"
                   onClick={() => setUserManagementOpen(true)}
-                  className="flex items-center gap-2"
+                  className="modern-button flex items-center gap-2"
                 >
                   <Shield className="w-4 h-4" />
                   Kullanıcı Yönetimi
@@ -245,7 +245,7 @@ export default function TalepTakipSistemi() {
                 variant="outline"
                 size="sm"
                 onClick={handleLogout}
-                className="flex items-center gap-2"
+                className="modern-button flex items-center gap-2"
               >
                 <LogOut className="w-4 h-4" />
                 Çıkış
@@ -255,92 +255,87 @@ export default function TalepTakipSistemi() {
         </div>
         
         {/* Sticky Tabs */}
-        <div className="container mx-auto px-4 max-w-7xl pb-4">
+        <div className="container mx-auto px-6 max-w-7xl pb-6">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
-              <TabsTrigger value="form">Talep Girişi</TabsTrigger>
-              <TabsTrigger value="table">Talep Takibi</TabsTrigger>
+            <TabsList className="modern-tabs grid w-full grid-cols-3 p-1">
+              <TabsTrigger value="dashboard" className="rounded-xl">Dashboard</TabsTrigger>
+              <TabsTrigger value="form" className="rounded-xl">Talep Girişi</TabsTrigger>
+              <TabsTrigger value="table" className="rounded-xl">Talep Takibi</TabsTrigger>
             </TabsList>
           </Tabs>
         </div>
       </div>
 
       {/* Content Area */}
-      <div className="container mx-auto p-4 max-w-7xl">
+      <div className="container mx-auto p-6 max-w-7xl">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsContent value="dashboard">
-            <Card>
-              <CardHeader>
-                <CardTitle>Dashboard</CardTitle>
-                <CardDescription>Talep takip sistemi istatistikleri ve analizler</CardDescription>
-              </CardHeader>
-              <CardContent>
-                {loading ? (
-                  <div className="flex justify-center items-center py-8">
-                    <div className="text-center">
-                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
-                      <p className="text-muted-foreground">Dashboard yükleniyor...</p>
-                    </div>
+            <div className="modern-card p-8">
+              <div className="mb-6">
+                <h2 className="text-2xl font-bold text-gray-800">Dashboard</h2>
+                <p className="text-muted-foreground">Talep takip sistemi istatistikleri ve analizler</p>
+              </div>
+              {loading ? (
+                <div className="flex justify-center items-center py-12">
+                  <div className="text-center">
+                    <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                    <p className="text-muted-foreground">Dashboard yükleniyor...</p>
                   </div>
-                ) : (
-                  <Dashboard talepler={talepler} />
-                )}
-              </CardContent>
-            </Card>
+                </div>
+              ) : (
+                <Dashboard talepler={talepler} />
+              )}
+            </div>
           </TabsContent>
 
           <TabsContent value="form">
-            <Card>
-              <CardHeader>
-                <CardTitle>Yeni Talep Girişi</CardTitle>
-                <CardDescription>Aşağıdaki formu doldurarak yeni bir talep oluşturun</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <TalepForm onSubmit={handleTalepEkle} />
-              </CardContent>
-            </Card>
+            <div className="modern-card p-8">
+              <div className="mb-6">
+                <h2 className="text-2xl font-bold text-gray-800">Yeni Talep Girişi</h2>
+                <p className="text-muted-foreground">Aşağıdaki formu doldurarak yeni bir talep oluşturun</p>
+              </div>
+              <TalepForm onSubmit={handleTalepEkle} />
+            </div>
           </TabsContent>
 
           <TabsContent value="table">
-            <Card>
-              <CardHeader>
-                <CardTitle>Talep Takip Tablosu</CardTitle>
-                <CardDescription>Mevcut talepleri görüntüleyin, düzenleyin ve yönetin</CardDescription>
-              </CardHeader>
-              <CardContent>
-                {loading ? (
-                  <div className="flex justify-center items-center py-8">
-                    <div className="text-center">
-                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
-                      <p className="text-muted-foreground">Talepler yükleniyor...</p>
-                    </div>
+            <div className="modern-card p-8">
+              <div className="mb-6">
+                <h2 className="text-2xl font-bold text-gray-800">Talep Takip Tablosu</h2>
+                <p className="text-muted-foreground">Mevcut talepleri görüntüleyin, düzenleyin ve yönetin</p>
+              </div>
+              {loading ? (
+                <div className="flex justify-center items-center py-12">
+                  <div className="text-center">
+                    <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                    <p className="text-muted-foreground">Talepler yükleniyor...</p>
                   </div>
-                ) : (
-                  <div className="space-y-4">
-                    <div className="flex justify-between items-center">
-                      <p className="text-sm text-muted-foreground">
-                        Toplam {talepler.length} talep bulundu
-                      </p>
-                      <Button 
-                        onClick={talepleriYukle} 
-                        variant="outline" 
-                        size="sm"
-                      >
-                        Yenile
-                      </Button>
-                    </div>
-                    <TalepTable
-                      talepler={talepler}
-                      onTalepGuncelle={handleTalepGuncelle}
-                      onTalepSil={handleTalepSil}
-                      onTalepEkle={handleTalepEkle}
-                      onTalepleriYenile={talepleriYukle}
-                    />
+                </div>
+              ) : (
+                <div className="space-y-6">
+                  <div className="flex justify-between items-center">
+                    <p className="text-sm text-muted-foreground">
+                      Toplam {talepler.length} talep bulundu
+                    </p>
+                    <Button 
+                      onClick={talepleriYukle} 
+                      variant="outline" 
+                      size="sm"
+                      className="modern-button"
+                    >
+                      Yenile
+                    </Button>
                   </div>
-                )}
-              </CardContent>
-            </Card>
+                  <TalepTable
+                    talepler={talepler}
+                    onTalepGuncelle={handleTalepGuncelle}
+                    onTalepSil={handleTalepSil}
+                    onTalepEkle={handleTalepEkle}
+                    onTalepleriYenile={talepleriYukle}
+                  />
+                </div>
+              )}
+            </div>
           </TabsContent>
         </Tabs>
       </div>
