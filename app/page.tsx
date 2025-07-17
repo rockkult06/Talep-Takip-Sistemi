@@ -215,8 +215,8 @@ export default function TalepTakipSistemi() {
 
   return (
     <div className="container mx-auto p-4 max-w-7xl">
-      {/* Header */}
-      <div className="mb-6">
+      {/* Sticky Header */}
+      <div className="sticky top-0 z-50 bg-white border-b border-gray-200 mb-6">
         <div className="flex items-center justify-between mb-4">
           <div>
             <h1 className="text-3xl font-bold">Talep Takip Sistemi</h1>
@@ -250,16 +250,16 @@ export default function TalepTakipSistemi() {
             </Button>
           </div>
         </div>
-      </div>
+        
+        {/* Sticky Tabs */}
+        <Tabs defaultValue="dashboard" className="w-full">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
+            <TabsTrigger value="form">Talep Girişi</TabsTrigger>
+            <TabsTrigger value="table">Talep Takibi</TabsTrigger>
+          </TabsList>
 
-      <Tabs defaultValue="dashboard" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
-          <TabsTrigger value="form">Talep Girişi</TabsTrigger>
-          <TabsTrigger value="table">Talep Takibi</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="dashboard">
+        <TabsContent value="dashboard" className="pt-6">
           <Card>
             <CardHeader>
               <CardTitle>Dashboard</CardTitle>
@@ -280,7 +280,7 @@ export default function TalepTakipSistemi() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="form">
+        <TabsContent value="form" className="pt-6">
           <Card>
             <CardHeader>
               <CardTitle>Yeni Talep Girişi</CardTitle>
@@ -292,7 +292,7 @@ export default function TalepTakipSistemi() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="table">
+        <TabsContent value="table" className="pt-6">
           <Card>
             <CardHeader>
               <CardTitle>Talep Takip Tablosu</CardTitle>
@@ -333,6 +333,7 @@ export default function TalepTakipSistemi() {
           </Card>
         </TabsContent>
       </Tabs>
+      </div>
 
       {/* Kullanıcı Yönetimi Modalı */}
       <UserManagementDialog
