@@ -40,6 +40,7 @@ export default function TalepTable({ talepler, onTalepGuncelle, onTalepSil, onTa
   const [filters, setFilters] = useState({
     talepSahibi: "",
     talepIlcesi: "",
+    bolge: "",
     talepDurumu: "",
     isletici: "",
     search: "",
@@ -139,6 +140,7 @@ export default function TalepTable({ talepler, onTalepGuncelle, onTalepSil, onTa
       return (
         (!filters.talepSahibi || filters.talepSahibi === "all" || talep.talepSahibi === filters.talepSahibi) &&
         (!filters.talepIlcesi || filters.talepIlcesi === "all" || talep.talepIlcesi === filters.talepIlcesi) &&
+        (!filters.bolge || filters.bolge === "all" || talep.bolge === filters.bolge) &&
         (!filters.talepDurumu || filters.talepDurumu === "all" || talep.talepDurumu === filters.talepDurumu) &&
         (!filters.isletici || filters.isletici === "all" || talep.isletici === filters.isletici) &&
         (!filters.search ||
@@ -296,6 +298,7 @@ export default function TalepTable({ talepler, onTalepGuncelle, onTalepSil, onTa
   const uniqueValues = {
     talepSahibi: [...new Set(talepler.map((t) => t.talepSahibi))].filter(Boolean),
     talepIlcesi: [...new Set(talepler.map((t) => t.talepIlcesi))].filter(Boolean),
+    bolge: [...new Set(talepler.map((t) => t.bolge))].filter(Boolean),
     talepDurumu: [...new Set(talepler.map((t) => t.talepDurumu))].filter(Boolean),
     isletici: [...new Set(talepler.map((t) => t.isletici))].filter(Boolean),
   }
@@ -340,7 +343,7 @@ export default function TalepTable({ talepler, onTalepGuncelle, onTalepSil, onTa
           <CardTitle>Filtreler</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
             <div className="space-y-2">
               <Label>Genel Arama</Label>
               <Input
@@ -380,6 +383,25 @@ export default function TalepTable({ talepler, onTalepGuncelle, onTalepSil, onTa
                 <SelectContent>
                   <SelectItem value="all">Tümü</SelectItem>
                   {uniqueValues.talepIlcesi.map((value) => (
+                    <SelectItem key={value} value={value}>
+                      {value}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Bölge</Label>
+              <Select
+                value={filters.bolge}
+                onValueChange={(value) => setFilters((prev) => ({ ...prev, bolge: value }))}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Tümü" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Tümü</SelectItem>
+                  {uniqueValues.bolge.map((value) => (
                     <SelectItem key={value} value={value}>
                       {value}
                     </SelectItem>
@@ -619,17 +641,18 @@ export default function TalepTable({ talepler, onTalepGuncelle, onTalepSil, onTa
                         <TableCell>{talep.guncellemeTarihi}</TableCell>
                       )}
                       <TableCell>
-                        <div className="flex gap-2">
+                        <div className="flex gap-1">
                           <Button
                             variant="outline"
                             size="sm"
                             onClick={() => toggleRowExpansion(talep.id)}
                             title="Detayları Göster/Gizle"
+                            className="h-8 w-8 p-0"
                           >
                             {expandedRows.has(talep.id) ? (
-                              <ChevronDown className="w-4 h-4" />
+                              <ChevronDown className="w-3 h-3" />
                             ) : (
-                              <ChevronRight className="w-4 h-4" />
+                              <ChevronRight className="w-3 h-3" />
                             )}
                           </Button>
                           <Button
@@ -637,50 +660,53 @@ export default function TalepTable({ talepler, onTalepGuncelle, onTalepSil, onTa
                             size="sm"
                             onClick={() => handleViewTalep(talep)}
                             title="Görüntüle"
+                            className="h-8 w-8 p-0"
                           >
-                            <Eye className="w-4 h-4" />
+                            <Eye className="w-3 h-3" />
                           </Button>
                           <Button
                             variant="outline"
                             size="sm"
                             onClick={() => handleEditTalep(talep)}
                             title="Düzenle"
+                            className="h-8 w-8 p-0"
                           >
-                            <Edit className="w-4 h-4" />
+                            <Edit className="w-3 h-3" />
                           </Button>
-                                                  <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={async () => {
-                            if (confirm("Bu talebi silmek istediğinizden emin misiniz?")) {
-                              try {
-                                const response = await fetch(`/api/talepler/${talep.id}`, {
-                                  method: 'DELETE',
-                                })
-                                
-                                const result = await response.json()
-                                
-                                if (response.ok) {
-                                  alert("Talep başarıyla silindi")
-                                  // Ana sayfadaki state'i güncelle
-                                  if (onTalepleriYenile) {
-                                    onTalepleriYenile()
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={async () => {
+                              if (confirm("Bu talebi silmek istediğinizden emin misiniz?")) {
+                                try {
+                                  const response = await fetch(`/api/talepler/${talep.id}`, {
+                                    method: 'DELETE',
+                                  })
+                                  
+                                  const result = await response.json()
+                                  
+                                  if (response.ok) {
+                                    alert("Talep başarıyla silindi")
+                                    // Ana sayfadaki state'i güncelle
+                                    if (onTalepleriYenile) {
+                                      onTalepleriYenile()
+                                    } else {
+                                      window.location.reload()
+                                    }
                                   } else {
-                                    window.location.reload()
+                                    alert("Silme işlemi başarısız: " + (result.error || 'Bilinmeyen hata'))
                                   }
-                                } else {
-                                  alert("Silme işlemi başarısız: " + (result.error || 'Bilinmeyen hata'))
+                                } catch (error) {
+                                  console.error('Silme hatası:', error)
+                                  alert("Silme işlemi sırasında hata oluştu")
                                 }
-                              } catch (error) {
-                                console.error('Silme hatası:', error)
-                                alert("Silme işlemi sırasında hata oluştu")
                               }
-                            }
-                          }}
-                          title="Sil"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
+                            }}
+                            title="Sil"
+                            className="h-8 w-8 p-0"
+                          >
+                            <Trash2 className="w-3 h-3" />
+                          </Button>
                         </div>
                       </TableCell>
                     </TableRow>
