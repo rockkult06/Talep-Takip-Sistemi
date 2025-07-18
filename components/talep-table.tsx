@@ -505,7 +505,7 @@ export default function TalepTable({ talepler, onTalepGuncelle, onTalepSil, onTa
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto">
-            <Table>
+            <Table className="min-w-full">
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-12">
@@ -522,25 +522,25 @@ export default function TalepTable({ talepler, onTalepGuncelle, onTalepSil, onTa
                       </div>
                     </TableHead>
                   )}
-                  <TableHead className="cursor-pointer" onClick={() => handleSort("talepSahibiAciklamasi")}>
+                  <TableHead className="cursor-pointer w-48" onClick={() => handleSort("talepSahibiAciklamasi")}>
                     <div className="flex items-center gap-1">
                       Açıklama
                       <ArrowUpDown className="w-4 h-4" />
                     </div>
                   </TableHead>
-                  <TableHead className="cursor-pointer" onClick={() => handleSort("talepIlcesi")}>
+                  <TableHead className="cursor-pointer w-24" onClick={() => handleSort("talepIlcesi")}>
                     <div className="flex items-center gap-1">
                       İlçe
                       <ArrowUpDown className="w-4 h-4" />
                     </div>
                   </TableHead>
-                  <TableHead className="cursor-pointer" onClick={() => handleSort("bolge")}>
+                  <TableHead className="cursor-pointer w-16" onClick={() => handleSort("bolge")}>
                     <div className="flex items-center gap-1">
                       Bölge
                       <ArrowUpDown className="w-4 h-4" />
                     </div>
                   </TableHead>
-                  <TableHead className="cursor-pointer" onClick={() => handleSort("hatNo")}>
+                  <TableHead className="cursor-pointer w-20" onClick={() => handleSort("hatNo")}>
                     <div className="flex items-center gap-1">
                       Hat No
                       <ArrowUpDown className="w-4 h-4" />
@@ -580,7 +580,7 @@ export default function TalepTable({ talepler, onTalepGuncelle, onTalepSil, onTa
                       </div>
                     </TableHead>
                   )}
-                  <TableHead>İşlemler</TableHead>
+                  <TableHead className="w-32">İşlemler</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -596,17 +596,17 @@ export default function TalepTable({ talepler, onTalepGuncelle, onTalepSil, onTa
                       {!compactView && (
                         <TableCell className="font-medium">{talep.talepSahibi}</TableCell>
                       )}
-                      <TableCell>
-                        <div className="max-w-[200px]">
+                      <TableCell className="w-48">
+                        <div className="max-w-[180px]">
                           <div className="truncate">{talep.talepSahibiAciklamasi}</div>
                           {talep.talepSahibiDigerAciklama && (
                             <div className="text-sm text-muted-foreground truncate">{talep.talepSahibiDigerAciklama}</div>
                           )}
                         </div>
                       </TableCell>
-                      <TableCell>{talep.talepIlcesi}</TableCell>
-                      <TableCell>{talep.bolge}</TableCell>
-                      <TableCell>{talep.hatNo}</TableCell>
+                      <TableCell className="w-24">{talep.talepIlcesi}</TableCell>
+                      <TableCell className="w-16">{talep.bolge}</TableCell>
+                      <TableCell className="w-20">{talep.hatNo}</TableCell>
                       {!compactView && (
                         <TableCell>{talep.isletici}</TableCell>
                       )}
@@ -640,19 +640,19 @@ export default function TalepTable({ talepler, onTalepGuncelle, onTalepSil, onTa
                       {!compactView && (
                         <TableCell>{talep.guncellemeTarihi}</TableCell>
                       )}
-                      <TableCell>
-                        <div className="flex gap-1">
+                      <TableCell className="w-32">
+                        <div className="flex gap-0.5">
                           <Button
                             variant="outline"
                             size="sm"
                             onClick={() => toggleRowExpansion(talep.id)}
                             title="Detayları Göster/Gizle"
-                            className="h-8 w-8 p-0"
+                            className="h-6 w-6 p-0"
                           >
                             {expandedRows.has(talep.id) ? (
-                              <ChevronDown className="w-3 h-3" />
+                              <ChevronDown className="w-2.5 h-2.5" />
                             ) : (
-                              <ChevronRight className="w-3 h-3" />
+                              <ChevronRight className="w-2.5 h-2.5" />
                             )}
                           </Button>
                           <Button
@@ -660,18 +660,18 @@ export default function TalepTable({ talepler, onTalepGuncelle, onTalepSil, onTa
                             size="sm"
                             onClick={() => handleViewTalep(talep)}
                             title="Görüntüle"
-                            className="h-8 w-8 p-0"
+                            className="h-6 w-6 p-0"
                           >
-                            <Eye className="w-3 h-3" />
+                            <Eye className="w-2.5 h-2.5" />
                           </Button>
                           <Button
                             variant="outline"
                             size="sm"
                             onClick={() => handleEditTalep(talep)}
                             title="Düzenle"
-                            className="h-8 w-8 p-0"
+                            className="h-6 w-6 p-0"
                           >
-                            <Edit className="w-3 h-3" />
+                            <Edit className="w-2.5 h-2.5" />
                           </Button>
                           <Button
                             variant="outline"
@@ -703,9 +703,9 @@ export default function TalepTable({ talepler, onTalepGuncelle, onTalepSil, onTa
                               }
                             }}
                             title="Sil"
-                            className="h-8 w-8 p-0"
+                            className="h-6 w-6 p-0"
                           >
-                            <Trash2 className="w-3 h-3" />
+                            <Trash2 className="w-2.5 h-2.5" />
                           </Button>
                         </div>
                       </TableCell>

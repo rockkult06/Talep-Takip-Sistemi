@@ -220,40 +220,40 @@ export default function TalepTakipSistemi() {
       <div className="sticky top-0 z-50 modern-header">
         <div className="container mx-auto p-6 max-w-7xl">
           <div className="flex items-center justify-between mb-6">
-            <div>
+          <div>
               <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Talep Takip Sistemi</h1>
               <p className="text-muted-foreground text-lg">Talep girişi, takibi ve yönetimi için kapsamlı sistem</p>
-            </div>
-            <div className="flex items-center gap-4">
+          </div>
+          <div className="flex items-center gap-4">
               <div className="flex items-center gap-3 text-sm modern-card px-4 py-2">
                 <User className="w-5 h-5 text-blue-600" />
                 <span className="font-medium">{kullanici.ad_soyad}</span>
-                <span className="text-muted-foreground">({kullanici.rol === 'admin' ? 'Admin' : 'Kullanıcı'})</span>
-              </div>
-              {kullanici.rol === 'admin' && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setUserManagementOpen(true)}
-                  className="modern-button flex items-center gap-2"
-                >
-                  <Shield className="w-4 h-4" />
-                  Kullanıcı Yönetimi
-                </Button>
-              )}
+              <span className="text-muted-foreground">({kullanici.rol === 'admin' ? 'Admin' : 'Kullanıcı'})</span>
+            </div>
+            {kullanici.rol === 'admin' && (
               <Button
                 variant="outline"
                 size="sm"
-                onClick={handleLogout}
-                className="modern-button flex items-center gap-2"
+                onClick={() => setUserManagementOpen(true)}
+                  className="modern-button flex items-center gap-2"
               >
-                <LogOut className="w-4 h-4" />
-                Çıkış
+                <Shield className="w-4 h-4" />
+                Kullanıcı Yönetimi
               </Button>
-            </div>
+            )}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleLogout}
+                className="modern-button flex items-center gap-2"
+            >
+              <LogOut className="w-4 h-4" />
+              Çıkış
+            </Button>
           </div>
         </div>
-        
+      </div>
+
         {/* Sticky Tabs */}
         <div className="container mx-auto px-6 max-w-7xl pb-6">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
@@ -261,7 +261,7 @@ export default function TalepTakipSistemi() {
               <TabsTrigger value="dashboard" className="rounded-xl">Dashboard</TabsTrigger>
               <TabsTrigger value="form" className="rounded-xl">Talep Girişi</TabsTrigger>
               <TabsTrigger value="table" className="rounded-xl">Talep Takibi</TabsTrigger>
-            </TabsList>
+        </TabsList>
           </Tabs>
         </div>
       </div>
@@ -269,7 +269,7 @@ export default function TalepTakipSistemi() {
       {/* Content Area */}
       <div className="container mx-auto p-6 max-w-7xl">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsContent value="dashboard">
+        <TabsContent value="dashboard">
             <div className="modern-card p-8">
               <div className="mb-6">
                 <h2 className="text-2xl font-bold text-gray-800">Dashboard</h2>
@@ -286,9 +286,9 @@ export default function TalepTakipSistemi() {
                 <Dashboard talepler={talepler} />
               )}
             </div>
-          </TabsContent>
+        </TabsContent>
 
-          <TabsContent value="form">
+        <TabsContent value="form">
             <div className="modern-card p-8">
               <div className="mb-6">
                 <h2 className="text-2xl font-bold text-gray-800">Yeni Talep Girişi</h2>
@@ -296,9 +296,9 @@ export default function TalepTakipSistemi() {
               </div>
               <TalepForm onSubmit={handleTalepEkle} />
             </div>
-          </TabsContent>
+        </TabsContent>
 
-          <TabsContent value="table">
+        <TabsContent value="table">
             <div className="modern-card p-8">
               <div className="mb-6">
                 <h2 className="text-2xl font-bold text-gray-800">Talep Takip Tablosu</h2>
@@ -336,8 +336,8 @@ export default function TalepTakipSistemi() {
                 </div>
               )}
             </div>
-          </TabsContent>
-        </Tabs>
+        </TabsContent>
+      </Tabs>
       </div>
 
       {/* Kullanıcı Yönetimi Modalı */}

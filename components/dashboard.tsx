@@ -90,8 +90,8 @@ export default function Dashboard({ talepler }: DashboardProps) {
           </div>
           <div className="text-3xl font-bold text-gray-800">{stats.totalTalepler}</div>
           <p className="text-sm text-gray-500 mt-1">
-            Tüm talepler
-          </p>
+              Tüm talepler
+            </p>
         </div>
 
         <div className="modern-card p-6">
@@ -101,8 +101,8 @@ export default function Dashboard({ talepler }: DashboardProps) {
           </div>
           <div className="text-3xl font-bold text-gray-800">{stats.yeniTalepler}</div>
           <p className="text-sm text-gray-500 mt-1">
-            Değerlendirilecek
-          </p>
+              Değerlendirilecek
+            </p>
         </div>
 
         <div className="modern-card p-6">
@@ -112,8 +112,8 @@ export default function Dashboard({ talepler }: DashboardProps) {
           </div>
           <div className="text-3xl font-bold text-gray-800">{stats.olumluTalepler}</div>
           <p className="text-sm text-gray-500 mt-1">
-            %{stats.durumYuzdeleri.olumlu.toFixed(1)} oranında
-          </p>
+              %{stats.durumYuzdeleri.olumlu.toFixed(1)} oranında
+            </p>
         </div>
 
         <div className="modern-card p-6">
@@ -123,8 +123,8 @@ export default function Dashboard({ talepler }: DashboardProps) {
           </div>
           <div className="text-3xl font-bold text-gray-800">{stats.son30Gun}</div>
           <p className="text-sm text-gray-500 mt-1">
-            Yeni talep
-          </p>
+              Yeni talep
+            </p>
         </div>
       </div>
 
@@ -196,24 +196,24 @@ export default function Dashboard({ talepler }: DashboardProps) {
             <MapPin className="w-6 h-6 text-green-600" />
             <h3 className="text-lg font-semibold text-gray-800">En Çok Talep Olan İlçeler</h3>
           </div>
-          <div className="space-y-4">
-            {topIlceler.map(([ilce, sayi], index) => (
+            <div className="space-y-4">
+              {topIlceler.map(([ilce, sayi], index) => (
               <div key={ilce} className="flex items-center justify-between p-3 bg-white/50 rounded-2xl">
-                <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-3">
                   <div className="w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center text-xs font-bold text-white">
-                    {index + 1}
-                  </div>
+                      {index + 1}
+                    </div>
                   <span className="font-medium text-gray-700">{ilce}</span>
-                </div>
-                <div className="flex items-center gap-2">
+                  </div>
+                  <div className="flex items-center gap-2">
                   <span className="text-lg font-bold text-gray-800">{sayi}</span>
                   <span className="text-sm text-gray-500">
-                    talep
-                  </span>
+                      talep
+                    </span>
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
         </div>
       </div>
 
@@ -224,24 +224,24 @@ export default function Dashboard({ talepler }: DashboardProps) {
             <Activity className="w-6 h-6 text-purple-600" />
             <h3 className="text-lg font-semibold text-gray-800">En Aktif İşleticiler</h3>
           </div>
-          <div className="space-y-4">
-            {topIsleticiler.map(([isletici, sayi], index) => (
+            <div className="space-y-4">
+              {topIsleticiler.map(([isletici, sayi], index) => (
               <div key={isletici} className="flex items-center justify-between p-3 bg-white/50 rounded-2xl">
-                <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-3">
                   <div className="w-8 h-8 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center text-xs font-bold text-white">
-                    {index + 1}
-                  </div>
+                      {index + 1}
+                    </div>
                   <span className="font-medium text-gray-700">{isletici}</span>
-                </div>
-                <div className="flex items-center gap-2">
+                  </div>
+                  <div className="flex items-center gap-2">
                   <span className="text-lg font-bold text-gray-800">{sayi}</span>
                   <span className="text-sm text-gray-500">
-                    talep
-                  </span>
+                      talep
+                    </span>
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
         </div>
 
         <div className="modern-card p-6">
@@ -249,47 +249,47 @@ export default function Dashboard({ talepler }: DashboardProps) {
             <BarChart3 className="w-6 h-6 text-indigo-600" />
             <h3 className="text-lg font-semibold text-gray-800">Hızlı İstatistikler</h3>
           </div>
-          <div className="space-y-4">
+            <div className="space-y-4">
             <div className="flex items-center justify-between p-4 bg-white/50 rounded-2xl">
               <div className="flex items-center gap-3">
                 <Users className="w-5 h-5 text-blue-500" />
                 <span className="text-sm font-medium text-gray-700">Benzersiz Talep Sahipleri</span>
-              </div>
+                </div>
               <span className="text-xl font-bold text-gray-800">
-                {new Set(talepler.map(t => t.talepSahibi)).size}
-              </span>
-            </div>
+                  {new Set(talepler.map(t => t.talepSahibi)).size}
+                </span>
+              </div>
 
             <div className="flex items-center justify-between p-4 bg-white/50 rounded-2xl">
               <div className="flex items-center gap-3">
                 <MapPin className="w-5 h-5 text-green-500" />
                 <span className="text-sm font-medium text-gray-700">Toplam İlçe</span>
-              </div>
+                </div>
               <span className="text-xl font-bold text-gray-800">
-                {new Set(talepler.map(t => t.talepIlcesi)).size}
-              </span>
-            </div>
+                  {new Set(talepler.map(t => t.talepIlcesi)).size}
+                </span>
+              </div>
 
             <div className="flex items-center justify-between p-4 bg-white/50 rounded-2xl">
               <div className="flex items-center gap-3">
                 <Activity className="w-5 h-5 text-purple-500" />
                 <span className="text-sm font-medium text-gray-700">Toplam İşletici</span>
-              </div>
+                </div>
               <span className="text-xl font-bold text-gray-800">
-                {new Set(talepler.map(t => t.isletici)).size}
-              </span>
-            </div>
+                  {new Set(talepler.map(t => t.isletici)).size}
+                </span>
+              </div>
 
             <div className="flex items-center justify-between p-4 bg-white/50 rounded-2xl">
               <div className="flex items-center gap-3">
                 <AlertCircle className="w-5 h-5 text-orange-500" />
                 <span className="text-sm font-medium text-gray-700">Bekleyen Talepler</span>
-              </div>
+                </div>
               <span className="text-xl font-bold text-orange-600">
-                {stats.yeniTalepler}
-              </span>
+                  {stats.yeniTalepler}
+                </span>
+              </div>
             </div>
-          </div>
         </div>
       </div>
 
@@ -299,44 +299,44 @@ export default function Dashboard({ talepler }: DashboardProps) {
           <div className="flex items-center gap-4">
             <div className="w-14 h-14 bg-gradient-to-r from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center shadow-lg">
               <CheckCircle className="w-7 h-7 text-white" />
-            </div>
-            <div>
-              <p className="text-sm text-blue-600 font-medium">Başarı Oranı</p>
+              </div>
+              <div>
+                <p className="text-sm text-blue-600 font-medium">Başarı Oranı</p>
               <p className="text-3xl font-bold text-blue-700">
-                %{stats.totalTalepler > 0 ? ((stats.olumluTalepler / stats.totalTalepler) * 100).toFixed(1) : '0'}
-              </p>
+                  %{stats.totalTalepler > 0 ? ((stats.olumluTalepler / stats.totalTalepler) * 100).toFixed(1) : '0'}
+                </p>
+              </div>
             </div>
-          </div>
         </div>
 
         <div className="modern-card p-6 bg-gradient-to-br from-green-50 to-green-100">
           <div className="flex items-center gap-4">
             <div className="w-14 h-14 bg-gradient-to-r from-green-500 to-green-600 rounded-2xl flex items-center justify-center shadow-lg">
               <TrendingUp className="w-7 h-7 text-white" />
-            </div>
-            <div>
-              <p className="text-sm text-green-600 font-medium">Aylık Trend</p>
+              </div>
+              <div>
+                <p className="text-sm text-green-600 font-medium">Aylık Trend</p>
               <p className="text-3xl font-bold text-green-700">
-                {stats.son30Gun}
-              </p>
-              <p className="text-xs text-green-600">son 30 gün</p>
+                  {stats.son30Gun}
+                </p>
+                <p className="text-xs text-green-600">son 30 gün</p>
+              </div>
             </div>
-          </div>
         </div>
 
         <div className="modern-card p-6 bg-gradient-to-br from-purple-50 to-purple-100">
           <div className="flex items-center gap-4">
             <div className="w-14 h-14 bg-gradient-to-r from-purple-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg">
               <FileText className="w-7 h-7 text-white" />
-            </div>
-            <div>
-              <p className="text-sm text-purple-600 font-medium">Ortalama</p>
+              </div>
+              <div>
+                <p className="text-sm text-purple-600 font-medium">Ortalama</p>
               <p className="text-3xl font-bold text-purple-700">
-                {stats.totalTalepler > 0 ? (stats.totalTalepler / Math.max(1, new Set(talepler.map(t => t.talepSahibi)).size)).toFixed(1) : '0'}
-              </p>
-              <p className="text-xs text-purple-600">talep/kişi</p>
+                  {stats.totalTalepler > 0 ? (stats.totalTalepler / Math.max(1, new Set(talepler.map(t => t.talepSahibi)).size)).toFixed(1) : '0'}
+                </p>
+                <p className="text-xs text-purple-600">talep/kişi</p>
+              </div>
             </div>
-          </div>
         </div>
       </div>
     </div>
